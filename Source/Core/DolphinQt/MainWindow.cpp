@@ -1332,7 +1332,7 @@ void MainWindow::StateSave()
   QString path =
       DolphinFileDialog::getSaveFileName(this, tr("Select a File"), QDir::currentPath(),
                                          tr("All Save States (*.sav *.s##);; All Files (*)"));
-  State::SaveAs(path.toStdString());
+  State::SaveFile(path.toStdString());
 }
 
 void MainWindow::StateLoadSlot()
