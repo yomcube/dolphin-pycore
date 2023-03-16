@@ -30,6 +30,11 @@ struct MemoryBreakpoint
   u32 addr;
   u64 value;
 };
+struct SaveStateLoad
+{
+  bool bFromSlot;
+  int slot;
+};
 struct CodeBreakpoint
 {
   u32 addr;
@@ -180,7 +185,7 @@ private:
 
 // all existing events need to be listed here, otherwise there will be spooky templating errors
 using EventHub = GenericEventHub<Events::FrameAdvance, Events::FrameDrawn, Events::SetInterrupt, Events::ClearInterrupt,
-                                 Events::MemoryBreakpoint, Events::CodeBreakpoint>;
+                                 Events::MemoryBreakpoint, Events::SaveStateLoad, Events::CodeBreakpoint>;
 
 // global event hub
 EventHub& GetEventHub();
