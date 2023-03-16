@@ -54,6 +54,7 @@ void Save(int slot, bool wait = false);
 void Load(int slot);
 
 void SaveAs(const std::string& filename, bool wait = false);
+void LoadFile(const std::string& filename);
 void LoadAs(const std::string& filename);
 
 void SaveToBuffer(std::vector<u8>& buffer);
