@@ -553,14 +553,20 @@ static void LoadFileStateData(const std::string& filename, std::vector<u8>& ret_
   ret_data.swap(buffer);
 }
 
-// Malleo - We want to emit an API event on savestate load.
-// Slot loads first pass through Load() and then LoadAs(),
-// whereas file loads ONLY pass through LoadAs().
-// To catch both scenarios, we want to first pass file loads through a separate function.
+// Malleo - We want to emit an API event on savestate load/save.
+// Slot loads/saves first pass through Load()/Save() and then LoadAs()/SaveAs(),
+// whereas file loads/saves ONLY pass through LoadAs()/SaveAs().
+// To catch both scenarios, we want to first pass file loads/saves through a separate function.
 void LoadFile(const std::string& filename)
 {
-  API::GetEventHub().EmitEvent(API::Events::SaveStateLoad(false, -1));
   LoadAs(filename);
+  API::GetEventHub().EmitEvent(API::Events::SaveStateLoad(false, -1));
+}
+
+void SaveFile(const std::string& filename, bool wait)
+{
+  SaveAs(filename, wait);
+  API::GetEventHub().EmitEvent(API::Events::SaveStateSave(false, -1));
 }
 
 void LoadAs(const std::string& filename)
@@ -673,12 +679,13 @@ static std::string MakeStateFilename(int number)
 void Save(int slot, bool wait)
 {
   SaveAs(MakeStateFilename(slot), wait);
+  API::GetEventHub().EmitEvent(API::Events::SaveStateSave(true, slot));
 }
 
 void Load(int slot)
 {
-  API::GetEventHub().EmitEvent(API::Events::SaveStateLoad(true, slot));
   LoadAs(MakeStateFilename(slot));
+  API::GetEventHub().EmitEvent(API::Events::SaveStateLoad(true, slot));
 }
 
 void LoadLastSaved(int i)
