@@ -1278,8 +1278,7 @@ void PlayController(GCPadStatus* PadStatus, int controllerID)
 }
 
 // NOTE: CPU Thread
-bool PlayWiimote(int wiimote, WiimoteCommon::DataReportBuilder& rpt, int ext,
-                 const EncryptionKey& key)
+bool PlayWiimote(int wiimote, WiimoteCommon::DataReportBuilder& rpt)
 {
   if (!IsPlayingInput() || !IsUsingWiimote(wiimote) || s_temp_input.empty())
     return false;
