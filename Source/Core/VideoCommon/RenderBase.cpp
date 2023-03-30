@@ -14,29 +14,14 @@
 #include "VideoCommon/RenderBase.h"
 
 #include <algorithm>
-#include <cinttypes>
 #include <cmath>
 #include <memory>
-#include <mutex>
-#include <string>
 #include <tuple>
 
 #include <fmt/format.h>
-#include <imgui.h>
 
-#include "Common/Assert.h"
-#include "Common/ChunkFile.h"
-#include "Common/CommonTypes.h"
-#include "Common/Config/Config.h"
-#include "Common/FileUtil.h"
-#include "Common/Flag.h"
-#include "Common/Image.h"
 #include "Common/Logging/Log.h"
 #include "Common/MsgHandler.h"
-#include "Common/Profiler.h"
-#include "Common/StringUtil.h"
-#include "Common/Thread.h"
-#include "Common/Timer.h"
 
 #include "Core/API/Gui.h"
 #include "Core/Config/GraphicsSettings.h"
@@ -44,200 +29,23 @@
 #include "Core/Config/NetplaySettings.h"
 #include "Core/Config/SYSCONFSettings.h"
 #include "Core/ConfigManager.h"
-#include "Core/Core.h"
-#include "Core/DolphinAnalytics.h"
-#include "Core/FifoPlayer/FifoRecorder.h"
-#include "Core/FreeLookConfig.h"
-#include "Core/HW/SystemTimers.h"
-#include "Core/HW/VideoInterface.h"
-#include "Core/Host.h"
-#include "Core/Movie.h"
+#include "Core/System.h"
 
-#include "InputCommon/ControllerInterface/ControllerInterface.h"
-
-#include "VideoCommon/AbstractFramebuffer.h"
-#include "VideoCommon/AbstractStagingTexture.h"
-#include "VideoCommon/AbstractTexture.h"
-#include "VideoCommon/BPFunctions.h"
-#include "VideoCommon/BPMemory.h"
-#include "VideoCommon/BoundingBox.h"
-#include "VideoCommon/CPMemory.h"
-#include "VideoCommon/CommandProcessor.h"
-#include "VideoCommon/FPSCounter.h"
-#include "VideoCommon/FrameDump.h"
 #include "VideoCommon/FramebufferManager.h"
-#include "VideoCommon/FramebufferShaderGen.h"
-#include "VideoCommon/FreeLookCamera.h"
-#include "VideoCommon/NetPlayChatUI.h"
-#include "VideoCommon/NetPlayGolfUI.h"
-#include "VideoCommon/OnScreenDisplay.h"
-#include "VideoCommon/OpcodeDecoding.h"
 #include "VideoCommon/PixelEngine.h"
-#include "VideoCommon/PixelShaderManager.h"
-#include "VideoCommon/PostProcessing.h"
-#include "VideoCommon/ShaderCache.h"
-#include "VideoCommon/ShaderGenCommon.h"
-#include "VideoCommon/Statistics.h"
-#include "VideoCommon/TextureCacheBase.h"
-#include "VideoCommon/TextureDecoder.h"
-#include "VideoCommon/VertexLoaderManager.h"
-#include "VideoCommon/VertexManagerBase.h"
-#include "VideoCommon/VertexShaderManager.h"
 #include "VideoCommon/VideoBackendBase.h"
 #include "VideoCommon/VideoCommon.h"
 #include "VideoCommon/VideoConfig.h"
-#include "VideoCommon/XFMemory.h"
 
 #include <Core/API/Events.h>
 
 std::unique_ptr<Renderer> g_renderer;
 
-static float AspectToWidescreen(float aspect)
-{
-  return aspect * ((16.0f / 9.0f) / (4.0f / 3.0f));
-}
-
-static bool DumpFrameToPNG(const FrameDump::FrameData& frame, const std::string& file_name)
-{
-  return Common::ConvertRGBAToRGBAndSavePNG(file_name, frame.data, frame.width, frame.height,
-                                            frame.stride,
-                                            Config::Get(Config::GFX_PNG_COMPRESSION_LEVEL));
-}
-
-Renderer::Renderer(int backbuffer_width, int backbuffer_height, float backbuffer_scale,
-                   AbstractTextureFormat backbuffer_format)
-    : m_backbuffer_width(backbuffer_width), m_backbuffer_height(backbuffer_height),
-      m_backbuffer_scale(backbuffer_scale),
-      m_backbuffer_format(backbuffer_format), m_last_xfb_width{MAX_XFB_WIDTH}, m_last_xfb_height{
-                                                                                   MAX_XFB_HEIGHT}
-{
-  UpdateActiveConfig();
-  FreeLook::UpdateActiveConfig();
-  UpdateDrawRectangle();
-  CalculateTargetSize();
-
-  m_is_game_widescreen = SConfig::GetInstance().bWii && Config::Get(Config::SYSCONF_WIDESCREEN);
-  g_freelook_camera.SetControlType(FreeLook::GetActiveConfig().camera_config.control_type);
-}
-
 Renderer::~Renderer() = default;
-
-bool Renderer::Initialize()
-{
-  if (!InitializeImGui())
-    return false;
-
-  m_post_processor = std::make_unique<VideoCommon::PostProcessing>();
-  if (!m_post_processor->Initialize(m_backbuffer_format))
-    return false;
-
-  m_bounding_box = CreateBoundingBox();
-  if (g_ActiveConfig.backend_info.bSupportsBBox && !m_bounding_box->Initialize())
-  {
-    PanicAlertFmt("Failed to initialize bounding box.");
-    return false;
-  }
-
-  return true;
-}
-
-void Renderer::Shutdown()
-{
-  // Disable ControllerInterface's aspect ratio adjustments so mapping dialog behaves normally.
-  g_controller_interface.SetAspectRatioAdjustment(1);
-
-  // First stop any framedumping, which might need to dump the last xfb frame. This process
-  // can require additional graphics sub-systems so it needs to be done first
-  ShutdownFrameDumping();
-  ShutdownImGui();
-  m_post_processor.reset();
-  m_bounding_box.reset();
-}
-
-void Renderer::BeginUtilityDrawing()
-{
-  g_vertex_manager->Flush();
-}
-
-void Renderer::EndUtilityDrawing()
-{
-  // Reset framebuffer/scissor/viewport. Pipeline will be reset at next draw.
-  g_framebuffer_manager->BindEFBFramebuffer();
-  BPFunctions::SetScissorAndViewport();
-}
-
-void Renderer::SetFramebuffer(AbstractFramebuffer* framebuffer)
-{
-  m_current_framebuffer = framebuffer;
-}
-
-void Renderer::SetAndDiscardFramebuffer(AbstractFramebuffer* framebuffer)
-{
-  m_current_framebuffer = framebuffer;
-}
-
-void Renderer::SetAndClearFramebuffer(AbstractFramebuffer* framebuffer,
-                                      const ClearColor& color_value, float depth_value)
-{
-  m_current_framebuffer = framebuffer;
-}
-
-bool Renderer::EFBHasAlphaChannel() const
-{
-  return m_prev_efb_format == PixelFormat::RGBA6_Z24;
-}
-
-void Renderer::ClearScreen(const MathUtil::Rectangle<int>& rc, bool colorEnable, bool alphaEnable,
-                           bool zEnable, u32 color, u32 z)
-{
-  g_framebuffer_manager->ClearEFB(rc, colorEnable, alphaEnable, zEnable, color, z);
-}
 
 void Renderer::ReinterpretPixelData(EFBReinterpretType convtype)
 {
   g_framebuffer_manager->ReinterpretPixelData(convtype);
-}
-
-bool Renderer::IsBBoxEnabled() const
-{
-  return m_bounding_box->IsEnabled();
-}
-
-void Renderer::BBoxEnable()
-{
-  m_bounding_box->Enable();
-}
-
-void Renderer::BBoxDisable()
-{
-  m_bounding_box->Disable();
-}
-
-u16 Renderer::BBoxRead(u32 index)
-{
-  if (!g_ActiveConfig.bBBoxEnable || !g_ActiveConfig.backend_info.bSupportsBBox)
-    return m_bounding_box_fallback[index];
-
-  return m_bounding_box->Get(index);
-}
-
-void Renderer::BBoxWrite(u32 index, u16 value)
-{
-  if (!g_ActiveConfig.bBBoxEnable || !g_ActiveConfig.backend_info.bSupportsBBox)
-  {
-    m_bounding_box_fallback[index] = value;
-    return;
-  }
-
-  m_bounding_box->Set(index, value);
-}
-
-void Renderer::BBoxFlush()
-{
-  if (!g_ActiveConfig.bBBoxEnable || !g_ActiveConfig.backend_info.bSupportsBBox)
-    return;
-
-  m_bounding_box->Flush();
 }
 
 u32 Renderer::AccessEFB(EFBAccessType type, u32 x, u32 y, u32 poke_data)
@@ -263,7 +71,8 @@ u32 Renderer::AccessEFB(EFBAccessType type, u32 x, u32 y, u32 poke_data)
     }
 
     // check what to do with the alpha channel (GX_PokeAlphaRead)
-    PixelEngine::AlphaReadMode alpha_read_mode = PixelEngine::GetAlphaReadMode();
+    PixelEngine::AlphaReadMode alpha_read_mode =
+        Core::System::GetInstance().GetPixelEngine().GetAlphaReadMode();
 
     if (alpha_read_mode == PixelEngine::AlphaReadMode::ReadNone)
     {
