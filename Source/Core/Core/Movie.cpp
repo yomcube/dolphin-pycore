@@ -63,8 +63,8 @@
 #include "Core/IOS/USB/Bluetooth/WiimoteDevice.h"
 #include "Core/NetPlayProto.h"
 #include "Core/State.h"
-#include "Core/System.h"
 #include "Core/WiiUtils.h"
+#include "Core/System.h"
 
 #include "DiscIO/Enums.h"
 
@@ -122,6 +122,9 @@ static bool s_bPolled = false;
 // s_InputDisplay is used by both CPU and GPU (is mutable).
 static std::mutex s_input_display_lock;
 static std::string s_InputDisplay[8];
+
+static GCManipFunction s_gc_manip_func;
+static WiiManipFunction s_wii_manip_func;
 
 static std::string s_current_file_name;
 
@@ -1296,7 +1299,8 @@ void PlayController(GCPadStatus* PadStatus, int controllerID)
 }
 
 // NOTE: CPU Thread
-bool PlayWiimote(int wiimote, WiimoteCommon::DataReportBuilder& rpt)
+bool PlayWiimote(int wiimote, WiimoteCommon::DataReportBuilder& rpt, int ext,
+                 const WiimoteEmu::EncryptionKey& key)
 {
   if (!IsPlayingInput() || !IsUsingWiimote(wiimote) || s_temp_input.empty())
     return false;
@@ -1315,12 +1319,12 @@ bool PlayWiimote(int wiimote, WiimoteCommon::DataReportBuilder& rpt)
   if (size != sizeInMovie)
   {
     PanicAlertFmtT(
-        "Fatal desync. Aborting playback. (Error in PlayWiimote: {0} != {1}, byte {2}.){3}",
-        sizeInMovie, size, s_currentByte,
-        (s_controllers == ControllerTypeArray{}) ?
-            " Try re-creating the recording with all GameCube controllers "
-            "disabled (in Configure > GameCube > Device Settings)." :
-            "");
+      "Fatal desync. Aborting playback. (Error in PlayWiimote: {0} != {1}, byte {2}.){3}",
+      sizeInMovie, size, s_currentByte,
+      (s_controllers == ControllerTypeArray{}) ?
+      " Try re-creating the recording with all GameCube controllers "
+      "disabled (in Configure > GameCube > Device Settings)." :
+      "");
     EndPlayInput(!s_bReadOnly);
     return false;
   }
@@ -1444,6 +1448,28 @@ void SaveRecording(const std::string& filename)
     Core::DisplayMessage(fmt::format("DTM {} saved", filename), 2000);
   else
     Core::DisplayMessage(fmt::format("Failed to save {}", filename), 2000);
+}
+
+void SetGCInputManip(GCManipFunction func)
+{
+  s_gc_manip_func = std::move(func);
+}
+void SetWiiInputManip(WiiManipFunction func)
+{
+  s_wii_manip_func = std::move(func);
+}
+
+// NOTE: CPU Thread
+void CallGCInputManip(GCPadStatus* PadStatus, int controllerID)
+{
+  if (s_gc_manip_func)
+    s_gc_manip_func(PadStatus, controllerID);
+}
+// NOTE: CPU Thread
+void CallWiiInputManip(DataReportBuilder& rpt, int controllerID, int ext, const EncryptionKey& key)
+{
+  if (s_wii_manip_func)
+    s_wii_manip_func(rpt, controllerID, ext, key);
 }
 
 // NOTE: GPU Thread

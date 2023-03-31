@@ -585,11 +585,13 @@ void Wiimote::SendDataReport(const DesiredWiimoteState& target_state)
     {
       // Note: Camera logic currently contains no changing state so we can just update it here.
       // If that changes this should be moved to Wiimote::Update();
-      m_camera_logic.Update(target_state.camera_points);
+      m_camera_logic.Update(target_state.camera_points, GetTotalTransformation(),
+                            Common::Vec2(m_fov_x_setting.GetValue(), m_fov_y_setting.GetValue()) /
+                            360 * float(MathUtil::TAU));
 
       // The real wiimote reads camera data from the i2c bus starting at offset 0x37:
       const u8 camera_data_offset =
-          CameraLogic::REPORT_DATA_OFFSET + rpt_builder.GetIRDataFormatOffset();
+        CameraLogic::REPORT_DATA_OFFSET + rpt_builder.GetIRDataFormatOffset();
 
       u8* ir_data = rpt_builder.GetIRDataPtr();
       const u8 ir_size = rpt_builder.GetIRDataSize();
@@ -614,8 +616,8 @@ void Wiimote::SendDataReport(const DesiredWiimoteState& target_state)
       {
         // TODO: Make input preparation triggered by bus read.
         m_motion_plus.PrepareInput(target_state.motion_plus.has_value() ?
-                                       target_state.motion_plus.value() :
-                                       MotionPlus::GetDefaultGyroscopeData());
+                                   target_state.motion_plus.value() :
+                                   MotionPlus::GetDefaultGyroscopeData());
       }
 
       u8* ext_data = rpt_builder.GetExtDataPtr();
@@ -628,26 +630,10 @@ void Wiimote::SendDataReport(const DesiredWiimoteState& target_state)
         std::fill_n(ext_data, ext_size, u8(0xff));
       }
     }
-
-    Movie::CallWiiInputManip(rpt_builder, m_index, m_active_extension, GetExtensionEncryptionKey());
-    API::GetWiiButtonsManip().PerformInputManip(rpt_builder, m_index);
-    API::GetWiiIRManip().PerformInputManip(rpt_builder, m_index);
-
-    if (rpt_builder.HasExt() && GetActiveExtensionNumber() == NUNCHUK)
-    {
-      API::GetNunchuckButtonsManip().PerformInputManip(rpt_builder, m_index,
-                                                       GetExtensionEncryptionKey());
-    }
   }
 
   Movie::CheckWiimoteStatus(m_bt_device_index, rpt_builder, m_active_extension,
                             GetExtensionEncryptionKey());
-
-  if (rpt_builder.HasExt() && GetActiveExtensionNumber() == NUNCHUK)
-  {
-    API::GetNunchuckButtonsManip().SaveNunchuckState(rpt_builder, m_index,
-                                                     GetExtensionEncryptionKey());
-  }
 
   // Send the report:
   InterruptDataInputCallback(rpt_builder.GetDataPtr(), rpt_builder.GetDataSize());

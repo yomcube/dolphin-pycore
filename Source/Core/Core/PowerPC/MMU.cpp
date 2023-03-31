@@ -205,12 +205,14 @@ static T ReadFromHardware(Core::System& system, Memory::MemoryManager& memory, u
     // Note that "word" means 32-bit, so paired singles or doubles might still be 32-bit aligned!
     u64 var = 0;
     for (u32 i = 0; i < sizeof(T); ++i)
-      var = (var << 8) | ReadFromHardware<flag, u8, TranslateCondition::Never>(em_address + i);
+      var = (var << 8) | ReadFromHardware<flag, u8, TranslateCondition::Never>(system, memory, em_address + i);
     return static_cast<T>(var);
   }
 
+  bool wi = false;
+
   const bool do_translate = translate_if == TranslateCondition::Always ||
-                            (translate_if == TranslateCondition::MsrDrSet && MSR.DR);
+                            (translate_if == TranslateCondition::MsrDrSet && PowerPC::ppcState.msr.DR);
   if (do_translate)
   {
     auto translated_addr = TranslateAddress<flag>(em_address);
@@ -325,7 +327,7 @@ static void WriteToHardware(Core::System& system, Memory::MemoryManager& memory,
   bool wi = false;
 
   const bool do_translate = translate_if == TranslateCondition::Always ||
-                            (translate_if == TranslateCondition::MsrDrSet && MSR.DR);
+                            (translate_if == TranslateCondition::MsrDrSet && PowerPC::ppcState.msr.DR);
   if (do_translate)
   {
     auto translated_addr = TranslateAddress<flag>(em_address);
@@ -843,47 +845,33 @@ u64 HostRead_U64(const Core::CPUThreadGuard& guard, const u32 address)
 
 s8 HostRead_S8(const Core::CPUThreadGuard& guard, const u32 address)
 {
-  auto& system = guard.GetSystem();
-  auto& memory = system.GetMemory();
   return static_cast<s8>(HostRead_U8(guard, address));
 }
 
 s16 HostRead_S16(const Core::CPUThreadGuard& guard, const u32 address)
 {
-  auto& system = guard.GetSystem();
-  auto& memory = system.GetMemory();
   return static_cast<s16>(HostRead_U16(guard, address));
 }
 
 s32 HostRead_S32(const Core::CPUThreadGuard& guard, const u32 address)
 {
-  auto& system = guard.GetSystem();
-  auto& memory = system.GetMemory();
   return static_cast<s32>(HostRead_U32(guard, address));
 }
 
 s64 HostRead_S64(const Core::CPUThreadGuard& guard, const u32 address)
 {
-  auto& system = guard.GetSystem();
-  auto& memory = system.GetMemory();
   return static_cast<s64>(HostRead_U64(guard, address));
 }
 
 float HostRead_F32(const Core::CPUThreadGuard& guard, const u32 address)
 {
-  auto& system = guard.GetSystem();
-  auto& memory = system.GetMemory();
   const u32 integral = HostRead_U32(guard, address);
-
   return Common::BitCast<float>(integral);
 }
 
 double HostRead_F64(const Core::CPUThreadGuard& guard, const u32 address)
 {
-  auto& system = guard.GetSystem();
-  auto& memory = system.GetMemory();
   const u64 integral = HostRead_U64(guard, address);
-
   return Common::BitCast<double>(integral);
 }
 

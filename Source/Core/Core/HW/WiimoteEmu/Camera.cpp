@@ -98,7 +98,7 @@ CameraLogic::GetCameraPoints(const Common::Matrix44& transform, Common::Vec2 fie
   return camera_points;
 }
 
-void CameraLogic::Update(const std::array<CameraPoint, NUM_POINTS>& camera_points)
+void CameraLogic::Update(const std::array<CameraPoint, NUM_POINTS>& camera_points, const Common::Matrix44& transform, Common::Vec2 field_of_view)
 {
   // IR data is read from offset 0x37 on real hardware.
   auto& data = m_reg_data.camera_data;
@@ -118,60 +118,6 @@ void CameraLogic::Update(const std::array<CameraPoint, NUM_POINTS>& camera_point
   WriteIRDataForTransform(data.data(), m_reg_data.mode, field_of_view, transform);
   
   switch (m_reg_data.mode)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   {
   case IR_MODE_BASIC:
     for (std::size_t i = 0; i != camera_points.size() / 2; ++i)
@@ -249,26 +195,18 @@ void CameraLogic::WriteIRDataForTransform(u8* data, u8 mode, Common::Vec2 field_
   using Common::Vec3;
   using Common::Vec4;
 
-  // FYI: A real wiimote normally only returns 1 point for each LED cluster (2 total).
-  // Sending all 4 points can actually cause some stuttering issues.
-  constexpr int NUM_POINTS = 2;
-
-  // Range from 0-15. Small values (2-4) seem to be very typical.
-  // This is reduced based on distance from sensor bar.
-  constexpr int MAX_POINT_SIZE = 15;
-
   const std::array<Vec3, NUM_POINTS> leds{
-      Vec3{-SENSOR_BAR_LED_SEPARATION / 2, 0, 0},
-      Vec3{SENSOR_BAR_LED_SEPARATION / 2, 0, 0},
+    Vec3{-SENSOR_BAR_LED_SEPARATION / 2, 0, 0},
+    Vec3{SENSOR_BAR_LED_SEPARATION / 2, 0, 0},
   };
 
   const auto camera_view =
-      Matrix44::Perspective(field_of_view.y, field_of_view.x / field_of_view.y, 0.001f, 1000) *
-      Matrix44::FromMatrix33(Matrix33::RotateX(float(MathUtil::TAU / 4))) * transform;
+    Matrix44::Perspective(field_of_view.y, field_of_view.x / field_of_view.y, 0.001f, 1000) *
+    Matrix44::FromMatrix33(Matrix33::RotateX(float(MathUtil::TAU / 4))) * transform;
 
   struct CameraPoint
   {
-    IRBasic::IRObject position;
+    Common::TVec2<u16> position;
     u8 size = 0;
   };
 
@@ -295,6 +233,73 @@ void CameraLogic::WriteIRDataForTransform(u8* data, u8 mode, Common::Vec2 field_
   });
 
   switch (mode)
+  {
+    case IR_MODE_BASIC:
+      for (std::size_t i = 0; i != camera_points.size() / 2; ++i)
+      {
+        IRBasic irdata = {};
+
+        irdata.SetObject1(camera_points[i * 2].position);
+        irdata.SetObject2(camera_points[i * 2 + 1].position);
+
+        Common::BitCastPtr<IRBasic>(&data[i * sizeof(IRBasic)]) = irdata;
+      }
+      break;
+    case IR_MODE_EXTENDED:
+      for (std::size_t i = 0; i != camera_points.size(); ++i)
+      {
+        const auto& p = camera_points[i];
+        if (p.position.x < CAMERA_RES_X)
+        {
+          IRExtended irdata = {};
+
+          irdata.SetPosition(p.position);
+          irdata.size = p.size;
+
+          Common::BitCastPtr<IRExtended>(&data[i * sizeof(IRExtended)]) = irdata;
+        }
+      }
+      break;
+    case IR_MODE_FULL:
+      for (std::size_t i = 0; i != camera_points.size(); ++i)
+      {
+        const auto& p = camera_points[i];
+        if (p.position.x < CAMERA_RES_X)
+        {
+          IRFull irdata = {};
+
+          irdata.SetPosition(p.position);
+          irdata.size = p.size;
+
+          // TODO: does size need to be scaled up?
+          // E.g. does size 15 cover the entire sensor range?
+
+          irdata.xmin = std::max(p.position.x - p.size, 0);
+          irdata.ymin = std::max(p.position.y - p.size, 0);
+          irdata.xmax = std::min(p.position.x + p.size, CAMERA_RES_X);
+          irdata.ymax = std::min(p.position.y + p.size, CAMERA_RES_Y);
+
+          constexpr int SUBPIXEL_RESOLUTION = 8;
+          constexpr long MAX_INTENSITY = 0xff;
+
+          // This is apparently the number of pixels the point takes up at 128x96 resolution.
+          // We simulate a circle that shrinks at sensor edges.
+          const auto intensity =
+            std::lround((irdata.xmax - irdata.xmin) * (irdata.ymax - irdata.ymin) /
+                        SUBPIXEL_RESOLUTION / SUBPIXEL_RESOLUTION * MathUtil::TAU / 8);
+
+          irdata.intensity = u8(std::min(MAX_INTENSITY, intensity));
+
+          Common::BitCastPtr<IRFull>(&data[i * sizeof(IRFull)]) = irdata;
+        }
+      }
+      break;
+    default:
+      // This seems to be fairly common, 0xff data is sent in this case:
+      // WARN_LOG(WIIMOTE, "Game is requesting IR data before setting IR mode.");
+      break;
+  }
+}
 
 void CameraLogic::SetEnabled(bool is_enabled)
 {

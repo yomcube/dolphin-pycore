@@ -95,7 +95,7 @@ public:
   TMemChecksStr GetStrings() const;
   void AddFromStrings(const TMemChecksStr& mc_strings);
 
-  void Add(TMemCheck memory_check);
+  void Add(TMemCheck& memory_check);
 
   bool ToggleBreakPoint(u32 address);
 

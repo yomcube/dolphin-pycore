@@ -452,7 +452,7 @@ void BreakpointWidget::AddAddressMBP(u32 addr, bool on_read, bool on_write, bool
       !condition.isEmpty() ? Expression::TryParse(condition.toUtf8().constData()) : std::nullopt;
   {
     const QSignalBlocker blocker(Settings::Instance());
-    PowerPC::memchecks.Add(std::move(check));
+    PowerPC::memchecks.Add(check);
   }
 
   emit BreakpointsChanged();
@@ -475,7 +475,7 @@ void BreakpointWidget::AddRangedMBP(u32 from, u32 to, bool on_read, bool on_writ
       !condition.isEmpty() ? Expression::TryParse(condition.toUtf8().constData()) : std::nullopt;
   {
     const QSignalBlocker blocker(Settings::Instance());
-    PowerPC::memchecks.Add(std::move(check));
+    PowerPC::memchecks.Add(check);
   }
 
   emit BreakpointsChanged();

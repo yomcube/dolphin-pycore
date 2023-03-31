@@ -5,9 +5,11 @@
 
 #include <array>
 #include <cstring>
+#include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
+
 
 #include "Common/CommonTypes.h"
 
@@ -185,7 +187,8 @@ bool PlayInput(const std::string& movie_path, std::optional<std::string>* savest
 void LoadInput(const std::string& movie_path);
 void ReadHeader();
 void PlayController(GCPadStatus* PadStatus, int controllerID);
-bool PlayWiimote(int wiimote, WiimoteCommon::DataReportBuilder& rpt);
+bool PlayWiimote(int wiimote, WiimoteCommon::DataReportBuilder& rpt, int ext,
+                 const WiimoteEmu::EncryptionKey& key);
 void EndPlayInput(bool cont);
 void SaveRecording(const std::string& filename);
 void DoState(PointerWrap& p);
@@ -198,4 +201,14 @@ std::string GetInputDisplay();
 std::string GetRTCDisplay();
 std::string GetRerecords();
 
+// Done this way to avoid mixing of core and gui code
+using GCManipFunction = std::function<void(GCPadStatus*, int)>;
+using WiiManipFunction = std::function<void(WiimoteCommon::DataReportBuilder&, int, int,
+                                            const WiimoteEmu::EncryptionKey&)>;
+
+void SetGCInputManip(GCManipFunction);
+void SetWiiInputManip(WiiManipFunction);
+void CallGCInputManip(GCPadStatus* PadStatus, int controllerID);
+void CallWiiInputManip(WiimoteCommon::DataReportBuilder& rpt, int controllerID, int ext,
+                       const WiimoteEmu::EncryptionKey& key);
 }  // namespace Movie

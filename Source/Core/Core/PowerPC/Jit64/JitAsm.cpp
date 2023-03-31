@@ -95,7 +95,7 @@ void Jit64AsmRoutineManager::Generate()
     // ABI_PushRegistersAndAdjustStack({}, 0);
     // ABI_CallFunction(PowerPC::CheckBreakPoints);
     // ABI_PopRegistersAndAdjustStack({}, 0);
-    MOV(64, R(RSCRATCH), ImmPtr(CPU::GetStatePtr()));
+    MOV(64, R(RSCRATCH), ImmPtr(system.GetCPU().GetStatePtr()));
     TEST(32, MatR(RSCRATCH), Imm32(0xFFFFFFFF));
     dbg_exit = J_CC(CC_NZ, true);
   }

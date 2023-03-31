@@ -397,7 +397,7 @@ void PPCDebugInterface::ToggleMemCheck(u32 address, bool read, bool write, bool 
     MemCheck.log_on_hit = log;
     MemCheck.break_on_hit = true;
 
-    PowerPC::memchecks.Add(std::move(MemCheck));
+    PowerPC::memchecks.Add(MemCheck);
   }
   else
   {
