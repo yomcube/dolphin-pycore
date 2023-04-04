@@ -5,50 +5,31 @@
 
 #include "DolphinQt/TAS/TASInputWindow.h"
 
-#include "Core/HW/WiimoteEmu/ExtensionPort.h"
-
-class QGroupBox;
-class QHideEvent;
-class QShowEvent;
-class QSpinBox;
-class TASCheckBox;
-class TASSpinBox;
+namespace WiimoteCommon
+{
+class DataReportBuilder;
+}
 
 namespace WiimoteEmu
 {
-class Extension;
-class Wiimote;
-}  // namespace WiimoteEmu
-
-namespace ControllerEmu
-{
-class Attachments;
+class EncryptionKey;
 }
+
+class QGroupBox;
+class QSpinBox;
+class TASCheckBox;
 
 class WiiTASInputWindow : public TASInputWindow
 {
-  Q_OBJECT
+Q_OBJECT
 public:
   explicit WiiTASInputWindow(QWidget* parent, int num);
-
-  void hideEvent(QHideEvent* event) override;
-  void showEvent(QShowEvent* event) override;
+  void GetValues(WiimoteCommon::DataReportBuilder& rpt, int ext,
+                 const WiimoteEmu::EncryptionKey& key);
 
 private:
-  WiimoteEmu::Wiimote* GetWiimote();
-  ControllerEmu::Attachments* GetAttachments();
-  WiimoteEmu::Extension* GetExtension();
-
-  void UpdateExt();
-
-  WiimoteEmu::ExtensionNumber m_active_extension;
-  bool m_is_motion_plus_attached;
+  void UpdateExt(u8 ext);
   int m_num;
-
-  InputOverrider m_wiimote_overrider;
-  InputOverrider m_nunchuk_overrider;
-  InputOverrider m_classic_overrider;
-
   TASCheckBox* m_a_button;
   TASCheckBox* m_b_button;
   TASCheckBox* m_1_button;
@@ -77,11 +58,24 @@ private:
   TASCheckBox* m_classic_up_button;
   TASCheckBox* m_classic_down_button;
   TASCheckBox* m_classic_right_button;
-  TASSpinBox* m_ir_x_value;
-  TASSpinBox* m_ir_y_value;
-  QGroupBox* m_remote_accelerometer_box;
-  QGroupBox* m_remote_gyroscope_box;
-  QGroupBox* m_nunchuk_accelerometer_box;
+  QSpinBox* m_remote_orientation_x_value;
+  QSpinBox* m_remote_orientation_y_value;
+  QSpinBox* m_remote_orientation_z_value;
+  QSpinBox* m_nunchuk_orientation_x_value;
+  QSpinBox* m_nunchuk_orientation_y_value;
+  QSpinBox* m_nunchuk_orientation_z_value;
+  QSpinBox* m_ir_x_value;
+  QSpinBox* m_ir_y_value;
+  QSpinBox* m_nunchuk_stick_x_value;
+  QSpinBox* m_nunchuk_stick_y_value;
+  QSpinBox* m_classic_left_stick_x_value;
+  QSpinBox* m_classic_left_stick_y_value;
+  QSpinBox* m_classic_right_stick_x_value;
+  QSpinBox* m_classic_right_stick_y_value;
+  QSpinBox* m_left_trigger_value;
+  QSpinBox* m_right_trigger_value;
+  QGroupBox* m_remote_orientation_box;
+  QGroupBox* m_nunchuk_orientation_box;
   QGroupBox* m_ir_box;
   TASStickBox* m_nunchuk_stick_box;
   TASStickBox* m_classic_left_stick_box;

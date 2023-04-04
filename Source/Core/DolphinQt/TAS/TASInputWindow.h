@@ -23,6 +23,7 @@ class QSpinBox;
 class QString;
 class TASCheckBox;
 class TASSpinBox;
+class TASStickBox;
 
 class InputOverrider final
 {
@@ -40,7 +41,7 @@ private:
 
 class TASInputWindow : public QDialog
 {
-  Q_OBJECT
+Q_OBJECT
 public:
   explicit TASInputWindow(QWidget* parent);
 
@@ -48,35 +49,32 @@ public:
   int GetTurboReleaseFrames() const;
 
 protected:
-  TASCheckBox* CreateButton(const QString& text, std::string_view group_name,
-                            std::string_view control_name, InputOverrider* overrider);
-  QGroupBox* CreateStickInputs(const QString& text, std::string_view group_name,
-                               InputOverrider* overrider, int min_x, int min_y, int max_x,
-                               int max_y, Qt::Key x_shortcut_key, Qt::Key y_shortcut_key);
-  QBoxLayout* CreateSliderValuePairLayout(const QString& text, std::string_view group_name,
-                                          std::string_view control_name, InputOverrider* overrider,
-                                          int zero, int default_, int min, int max,
+  void focusOutEvent(QFocusEvent* event) override;
+  void focusInEvent(QFocusEvent* event) override;
+
+  TASCheckBox* CreateButton(const QString& name);
+  TASStickBox* CreateStickInputs(QString name, QSpinBox*& x_value, QSpinBox*& y_value, u16 max_x,
+                                 u16 max_y, Qt::Key x_shortcut_key, Qt::Key y_shortcut_key);
+  QBoxLayout* CreateSliderValuePairLayout(QString name, QSpinBox*& value, int default_, u16 max,
                                           Qt::Key shortcut_key, QWidget* shortcut_widget,
-                                          std::optional<ControlState> scale = {});
-  TASSpinBox* CreateSliderValuePair(std::string_view group_name, std::string_view control_name,
-                                    InputOverrider* overrider, QBoxLayout* layout, int zero,
-                                    int default_, int min, int max,
-                                    QKeySequence shortcut_key_sequence, Qt::Orientation orientation,
-                                    QWidget* shortcut_widget,
-                                    std::optional<ControlState> scale = {});
-  TASSpinBox* CreateSliderValuePair(QBoxLayout* layout, int default_, int max,
-                                    QKeySequence shortcut_key_sequence, Qt::Orientation orientation,
-                                    QWidget* shortcut_widget);
+                                          bool invert = false);
+  QSpinBox* CreateSliderValuePair(QBoxLayout* layout, int default_, u16 max,
+                                  QKeySequence shortcut_key_sequence, Qt::Orientation orientation,
+                                  QWidget* shortcut_widget, bool invert = false);
+  template <typename UX>
+  void GetButton(TASCheckBox* button, UX& pad, UX mask);
+  void GetSpinBoxU8(QSpinBox* spin, u8& controller_value);
+  void GetSpinBoxU16(QSpinBox* spin, u16& controller_value);
 
   QGroupBox* m_settings_box;
   QCheckBox* m_use_controller;
+  QCheckBox* m_toggle_lines;
   QSpinBox* m_turbo_press_frames;
   QSpinBox* m_turbo_release_frames;
 
 private:
-  std::optional<ControlState> GetButton(TASCheckBox* checkbox, ControlState controller_state);
-  std::optional<ControlState> GetSpinBox(TASSpinBox* spin, int zero, int min, int max,
-                                         ControlState controller_state);
-  std::optional<ControlState> GetSpinBox(TASSpinBox* spin, int zero, ControlState controller_state,
-                                         ControlState scale);
+
+  std::map<TASCheckBox*, bool> m_checkbox_set_by_controller;
+  std::map<QSpinBox*, u8> m_spinbox_most_recent_values_u8;
+  std::map<QSpinBox*, u8> m_spinbox_most_recent_values_u16;
 };
