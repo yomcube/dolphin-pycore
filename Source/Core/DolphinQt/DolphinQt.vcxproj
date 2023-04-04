@@ -64,6 +64,7 @@
     <ClCompile Include="Config\FilesystemWidget.cpp" />
     <ClCompile Include="Config\FreeLookWidget.cpp" />
     <ClCompile Include="Config\FreeLookWindow.cpp" />
+    <ClCompile Include="Config\GamecubeControllersWidget.cpp" />
     <ClCompile Include="Config\GameConfigEdit.cpp" />
     <ClCompile Include="Config\GameConfigHighlighter.cpp" />
     <ClCompile Include="Config\GameConfigWidget.cpp" />
@@ -83,6 +84,7 @@
     <ClCompile Include="Config\Graphics\PostProcessingConfigWindow.cpp" />
     <ClCompile Include="Config\GraphicsModListWidget.cpp" />
     <ClCompile Include="Config\GraphicsModWarningWidget.cpp" />
+    <ClCompile Include="Config\Graphics\SoftwareRendererWidget.cpp" />
     <ClCompile Include="Config\InfoWidget.cpp" />
     <ClCompile Include="Config\LogConfigWidget.cpp" />
     <ClCompile Include="Config\LogWidget.cpp" />
@@ -98,6 +100,7 @@
     <ClCompile Include="Config\Mapping\HotkeyDebugging.cpp" />
     <ClCompile Include="Config\Mapping\HotkeyGBA.cpp" />
     <ClCompile Include="Config\Mapping\HotkeyGeneral.cpp" />
+    <ClCompile Include="Config\Mapping\HotkeyGBA.cpp" />
     <ClCompile Include="Config\Mapping\HotkeyGraphics.cpp" />
     <ClCompile Include="Config\Mapping\HotkeyStates.cpp" />
     <ClCompile Include="Config\Mapping\HotkeyStatesOther.cpp" />
@@ -137,6 +140,7 @@
     <ClCompile Include="Debugger\MemoryViewWidget.cpp" />
     <ClCompile Include="Debugger\MemoryWidget.cpp" />
     <ClCompile Include="Debugger\NetworkWidget.cpp" />
+    <ClCompile Include="Debugger\NewBreakpointDialog.cpp" />
     <ClCompile Include="Debugger\PatchInstructionDialog.cpp" />
     <ClCompile Include="Debugger\RegisterColumn.cpp" />
     <ClCompile Include="Debugger\RegisterWidget.cpp" />
@@ -163,6 +167,7 @@
     <ClCompile Include="NetPlay\ChunkedProgressDialog.cpp" />
     <ClCompile Include="NetPlay\GameDigestDialog.cpp" />
     <ClCompile Include="NetPlay\GameListDialog.cpp" />
+    <ClCompile Include="NetPlay\MD5Dialog.cpp" />
     <ClCompile Include="NetPlay\NetPlayBrowser.cpp" />
     <ClCompile Include="NetPlay\NetPlayDialog.cpp" />
     <ClCompile Include="NetPlay\NetPlaySetupDialog.cpp" />
@@ -214,6 +219,7 @@
     <ClCompile Include="TAS\TASControlState.cpp" />
     <ClCompile Include="TAS\TASSlider.cpp" />
     <ClCompile Include="TAS\TASSpinBox.cpp" />
+    <ClCompile Include="TAS\TASStickBox.cpp" />
     <ClCompile Include="TAS\WiiTASInputWindow.cpp" />
     <ClCompile Include="ToolBar.cpp" />
     <ClCompile Include="Translation.cpp" />
@@ -249,6 +255,7 @@
     <ClInclude Include="ResourcePackManager.h" />
     <ClInclude Include="Resources.h" />
     <ClInclude Include="TAS\TASControlState.h" />
+    <ClInclude Include="TAS\TASStickBox.h" />
     <ClInclude Include="TAS\TASSlider.h" />
     <ClInclude Include="Translation.h" />
     <ClInclude Include="WiiUpdate.h" />
@@ -286,6 +293,7 @@
     <QtMoc Include="Config\Graphics\PostProcessingConfigWindow.h" />
     <QtMoc Include="Config\GraphicsModListWidget.h" />
     <QtMoc Include="Config\GraphicsModWarningWidget.h" />
+    <QtMoc Include="Config\Graphics\SoftwareRendererWidget.h" />
     <QtMoc Include="Config\InfoWidget.h" />
     <QtMoc Include="Config\LogConfigWidget.h" />
     <QtMoc Include="Config\LogWidget.h" />
@@ -336,6 +344,7 @@
     <QtMoc Include="Debugger\MemoryViewWidget.h" />
     <QtMoc Include="Debugger\MemoryWidget.h" />
     <QtMoc Include="Debugger\NetworkWidget.h" />
+    <QtMoc Include="Debugger\NewBreakpointDialog.h" />
     <QtMoc Include="Debugger\PatchInstructionDialog.h" />
     <QtMoc Include="Debugger\RegisterWidget.h" />
     <QtMoc Include="Debugger\ThreadWidget.h" />
@@ -359,6 +368,7 @@
     <QtMoc Include="NetPlay\ChunkedProgressDialog.h" />
     <QtMoc Include="NetPlay\GameDigestDialog.h" />
     <QtMoc Include="NetPlay\GameListDialog.h" />
+    <QtMoc Include="NetPlay\MD5Dialog.h" />
     <QtMoc Include="NetPlay\NetPlayBrowser.h" />
     <QtMoc Include="NetPlay\NetPlayDialog.h" />
     <QtMoc Include="NetPlay\NetPlaySetupDialog.h" />
@@ -430,20 +440,7 @@
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(ExternalsDir)bzip2\exports.props" />
-  <Import Project="$(ExternalsDir)cpp-optparse\exports.props" />
-  <Import Project="$(ExternalsDir)discord-rpc\exports.props" />
-  <Import Project="$(ExternalsDir)enet\exports.props" />
-  <Import Project="$(ExternalsDir)fmt\exports.props" />
-  <Import Project="$(ExternalsDir)imgui\exports.props" />
-  <Import Project="$(ExternalsDir)implot\exports.props" />
-  <Import Project="$(ExternalsDir)liblzma\exports.props" />
-  <Import Project="$(ExternalsDir)mbedtls\exports.props" />
-  <Import Project="$(ExternalsDir)mGBA\exports.props" />
-  <Import Project="$(ExternalsDir)picojson\exports.props" />
-  <Import Project="$(ExternalsDir)SFML\exports.props" />
-  <Import Project="$(ExternalsDir)soundtouch\exports.props" />
-  <Import Project="$(ExternalsDir)zstd\exports.props" />
+  <Import Project="$(ExternalsDir)ExternalsReferenceAll.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
   <!--Copy Exe, Data directory and DLLs which should be located in the executable directory-->

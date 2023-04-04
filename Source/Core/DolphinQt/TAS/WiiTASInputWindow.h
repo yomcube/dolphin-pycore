@@ -83,9 +83,9 @@ private:
   QGroupBox* m_remote_gyroscope_box;
   QGroupBox* m_nunchuk_accelerometer_box;
   QGroupBox* m_ir_box;
-  QGroupBox* m_nunchuk_stick_box;
-  QGroupBox* m_classic_left_stick_box;
-  QGroupBox* m_classic_right_stick_box;
+  TASStickBox* m_nunchuk_stick_box;
+  TASStickBox* m_classic_left_stick_box;
+  TASStickBox* m_classic_right_stick_box;
   QGroupBox* m_remote_buttons_box;
   QGroupBox* m_nunchuk_buttons_box;
   QGroupBox* m_classic_buttons_box;

@@ -3,11 +3,11 @@ if(POLICY CMP0084)
   cmake_policy(SET CMP0084 NEW)
 endif()
 
-if (MSVC)
+if (NOT QT_DIR AND MSVC)
   if(_M_ARM_64)
-    list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/Externals/Qt/Qt6.3.0/ARM64")
+    set(QT_DIR "${CMAKE_SOURCE_DIR}/Externals/Qt/Qt6.3.0/ARM64/lib/cmake/Qt6")
   else()
-    list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/Externals/Qt/Qt6.3.0/x64")
+    set(QT_DIR "${CMAKE_SOURCE_DIR}/Externals/Qt/Qt6.3.0/x64/lib/cmake/Qt6")
   endif()
 endif()
 
@@ -33,6 +33,41 @@ add_executable(dolphin-emu
   CheatSearchWidget.h
   CheatsManager.cpp
   CheatsManager.h
+  ConvertDialog.cpp
+  ConvertDialog.h
+  DiscordHandler.cpp
+  DiscordHandler.h
+  DiscordJoinRequestDialog.cpp
+  DiscordJoinRequestDialog.h
+  FIFO/FIFOPlayerWindow.cpp
+  FIFO/FIFOPlayerWindow.h
+  FIFO/FIFOAnalyzer.cpp
+  FIFO/FIFOAnalyzer.h
+  Host.cpp
+  Host.h
+  HotkeyScheduler.cpp
+  HotkeyScheduler.h
+  Main.cpp
+  MainWindow.cpp
+  MainWindow.h
+  MenuBar.cpp
+  MenuBar.h
+  NKitWarningDialog.cpp
+  NKitWarningDialog.h
+  RenderWidget.cpp
+  RenderWidget.h
+  Resources.cpp
+  Resources.h
+  SearchBar.cpp
+  SearchBar.h
+  Settings.cpp
+  Settings.h
+  ToolBar.cpp
+  ToolBar.h
+  Translation.cpp
+  Translation.h
+  WiiUpdate.cpp
+  WiiUpdate.h
   Config/ARCodeWidget.cpp
   Config/ARCodeWidget.h
   Config/CheatCodeEditor.cpp
@@ -47,6 +82,8 @@ add_executable(dolphin-emu
   Config/ControllerInterface/DualShockUDPClientAddServerDialog.h
   Config/ControllerInterface/DualShockUDPClientWidget.cpp
   Config/ControllerInterface/DualShockUDPClientWidget.h
+  Config/ControllerInterface/ControllerInterfaceWindow.cpp
+  Config/ControllerInterface/ControllerInterfaceWindow.h
   Config/ControllerInterface/ServerStringValidator.cpp
   Config/ControllerInterface/ServerStringValidator.h
   Config/ControllersWindow.cpp
@@ -57,6 +94,8 @@ add_executable(dolphin-emu
   Config/FreeLookWidget.h
   Config/FreeLookWindow.cpp
   Config/FreeLookWindow.h
+  Config/GamecubeControllersWidget.cpp
+  Config/GamecubeControllersWidget.h
   Config/GameConfigEdit.cpp
   Config/GameConfigEdit.h
   Config/GameConfigHighlighter.cpp
@@ -96,6 +135,8 @@ add_executable(dolphin-emu
   Config/GraphicsModListWidget.h
   Config/GraphicsModWarningWidget.cpp
   Config/GraphicsModWarningWidget.h
+  Config/Graphics/SoftwareRendererWidget.cpp
+  Config/Graphics/SoftwareRendererWidget.h
   Config/InfoWidget.cpp
   Config/InfoWidget.h
   Config/LogConfigWidget.cpp
@@ -204,6 +245,8 @@ add_executable(dolphin-emu
   Debugger/MemoryWidget.h
   Debugger/NetworkWidget.cpp
   Debugger/NetworkWidget.h
+  Debugger/NewBreakpointDialog.cpp
+  Debugger/NewBreakpointDialog.h
   Debugger/PatchInstructionDialog.cpp
   Debugger/PatchInstructionDialog.h
   Debugger/RegisterColumn.cpp
@@ -245,12 +288,16 @@ add_executable(dolphin-emu
   MainWindow.h
   MenuBar.cpp
   MenuBar.h
+  QtUtils/BlockUserInputFilter.cpp
+  QtUtils/BlockUserInputFilter.h
   NetPlay/ChunkedProgressDialog.cpp
   NetPlay/ChunkedProgressDialog.h
   NetPlay/GameDigestDialog.cpp
   NetPlay/GameDigestDialog.h
   NetPlay/GameListDialog.cpp
   NetPlay/GameListDialog.h
+  NetPlay/MD5Dialog.cpp
+  NetPlay/MD5Dialog.h
   NetPlay/NetPlayBrowser.cpp
   NetPlay/NetPlayBrowser.h
   NetPlay/NetPlayDialog.cpp
@@ -286,6 +333,8 @@ add_executable(dolphin-emu
   QtUtils/ParallelProgressDialog.h
   QtUtils/PartiallyClosableTabWidget.cpp
   QtUtils/PartiallyClosableTabWidget.h
+  QtUtils/ImageConverter.cpp
+  QtUtils/ImageConverter.h
   QtUtils/SignalBlocking.h
   QtUtils/UTF8CodePointCountValidator.cpp
   QtUtils/UTF8CodePointCountValidator.h
@@ -297,6 +346,10 @@ add_executable(dolphin-emu
   QtUtils/WrapInScrollArea.h
   RenderWidget.cpp
   RenderWidget.h
+  QtUtils/AspectRatioWidget.cpp
+  QtUtils/AspectRatioWidget.h
+  QtUtils/NonDefaultQPushButton.cpp
+  QtUtils/NonDefaultQPushButton.h
   ResourcePackManager.cpp
   ResourcePackManager.h
   Resources.cpp
@@ -321,6 +374,8 @@ add_executable(dolphin-emu
   Settings/InterfacePane.h
   Settings/PathPane.cpp
   Settings/PathPane.h
+  Settings/WiiPane.cpp
+  Settings/WiiPane.h
   Settings/USBDeviceAddToWhitelistDialog.cpp
   Settings/USBDeviceAddToWhitelistDialog.h
   Settings/WiiPane.cpp
@@ -329,6 +384,8 @@ add_executable(dolphin-emu
   SkylanderPortal/SkylanderPortalWindow.h
   TAS/GCTASInputWindow.cpp
   TAS/GCTASInputWindow.h
+  TAS/WiiTASInputWindow.cpp
+  TAS/WiiTASInputWindow.h
   TAS/GBATASInputWindow.cpp
   TAS/GBATASInputWindow.h
   TAS/IRWidget.cpp
@@ -343,6 +400,8 @@ add_executable(dolphin-emu
   TAS/TASInputWindow.h
   TAS/TASSlider.cpp
   TAS/TASSlider.h
+  TAS/TASStickBox.cpp
+  TAS/TASStickBox.h
   TAS/TASSpinBox.cpp
   TAS/TASSpinBox.h
   TAS/WiiTASInputWindow.cpp
@@ -592,91 +651,38 @@ if(APPLE)
 
   # Copy MoltenVK into the bundle
   if(ENABLE_VULKAN)
-    if(USE_BUNDLED_MOLTENVK)
-      add_dependencies(dolphin-emu MoltenVK)
-      ExternalProject_Get_Property(MoltenVK SOURCE_DIR)
-      target_sources(dolphin-emu PRIVATE "${SOURCE_DIR}/Package/Release/MoltenVK/dylib/macOS/libMoltenVK.dylib")
-      set_source_files_properties("${SOURCE_DIR}/Package/Release/MoltenVK/dylib/macOS/libMoltenVK.dylib" PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks GENERATED ON)
-    else()
-      find_file(MOLTENVK_DYLIB NAMES libMoltenVK.dylib PATH_SUFFIXES lib)
-      if(NOT MOLTENVK_DYLIB)
-        message(FATAL_ERROR "Couldn't find libMoltenVK.dylib.  Enable USE_BUNDLED_MOLTENVK?")
-      endif()
-      target_sources(dolphin-emu PRIVATE ${MOLTENVK_DYLIB})
-      set_source_files_properties(${MOLTENVK_DYLIB} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
-    endif()
+    add_dependencies(dolphin-emu MoltenVK)
+    ExternalProject_Get_Property(MoltenVK SOURCE_DIR)
+    target_sources(dolphin-emu PRIVATE "${SOURCE_DIR}/Package/Release/MoltenVK/dylib/macOS/libMoltenVK.dylib")
+    set_source_files_properties("${SOURCE_DIR}/Package/Release/MoltenVK/dylib/macOS/libMoltenVK.dylib" PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks GENERATED ON)
   endif()
 
-  if(NOT SKIP_POSTPROCESS_BUNDLE)
-    # Update library references to make the bundle portable
-    include(DolphinPostprocessBundle)
-    dolphin_postprocess_bundle(dolphin-emu)
-    # Fix rpath
-    add_custom_command(TARGET dolphin-emu
-      POST_BUILD COMMAND
-      ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/../Frameworks/"
-      $<TARGET_FILE:dolphin-emu>)
-  endif()
+  # Update library references to make the bundle portable
+  include(DolphinPostprocessBundle)
+  dolphin_postprocess_bundle(dolphin-emu)
+  # Fix rpath
+  add_custom_command(TARGET dolphin-emu
+    POST_BUILD COMMAND
+    ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/../Frameworks/"
+    $<TARGET_FILE:dolphin-emu>)
 
   if(MACOS_CODE_SIGNING)
     # Code sign make file builds
     add_custom_command(TARGET dolphin-emu
       POST_BUILD COMMAND
       /usr/bin/codesign -f -s "${MACOS_CODE_SIGNING_IDENTITY}" --deep --options=runtime --entitlements "${CMAKE_SOURCE_DIR}/Source/Core/DolphinQt/DolphinEmu$<$<CONFIG:Debug>:Debug>.entitlements" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Dolphin.app" || true)
-
+    
     # Code sign builds for build systems that do have release/debug variants (Xcode)
     add_custom_command(TARGET dolphin-emu
       POST_BUILD COMMAND
       /usr/bin/codesign -f -s "${MACOS_CODE_SIGNING_IDENTITY}" --deep --options=runtime --entitlements "${CMAKE_SOURCE_DIR}/Source/Core/DolphinQt/DolphinEmuDebug.entitlements" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/Dolphin.app" || true)
-
+      
     add_custom_command(TARGET dolphin-emu
       POST_BUILD COMMAND
       /usr/bin/codesign -f -s "${MACOS_CODE_SIGNING_IDENTITY}" --deep --options=runtime --entitlements "${CMAKE_SOURCE_DIR}/Source/Core/DolphinQt/DolphinEmu.entitlements" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/Dolphin.app" || true)
   endif()
 else()
-  install(TARGETS dolphin-emu RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif()
-
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND STEAM)
-  # Set that we want ORIGIN in FLAGS.
-  # We also want RPATH, not RUNPATH, so disable the new tags.
-  target_link_options(dolphin-emu
-  PRIVATE
-    LINKER:-z,origin
-    LINKER:--disable-new-dtags
-  )
-
-  # For Steam Runtime builds, our Qt shared libraries will be in a "lib" folder.
-  set_target_properties(dolphin-emu PROPERTIES
-    BUILD_WITH_INSTALL_RPATH true
-    INSTALL_RPATH "\$ORIGIN/lib"
-  )
-
-  add_custom_command(TARGET dolphin-emu POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/lib"
-    COMMAND cp "${QT_DIR}/../../LICENSE.*" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/lib"
-    COMMAND cp -P "${QT_DIR}/../../*.so*" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/lib"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${QT_DIR}/../../../plugins" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/plugins"
-  )
-
-  # Copy qt.conf
-  target_sources(dolphin-emu PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/qt.conf")
-  add_custom_command(TARGET dolphin-emu POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/qt.conf" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qt.conf"
-  )
-
-  # Mark all data files as resources
-  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/Data/Sys")
-  file(GLOB_RECURSE resources RELATIVE "${CMAKE_SOURCE_DIR}/Data" "${CMAKE_SOURCE_DIR}/Data/Sys/*")
-  foreach(res ${resources})
-    target_sources(dolphin-emu PRIVATE "${CMAKE_SOURCE_DIR}/Data/${res}")
-    source_group("Resources" FILES "${CMAKE_SOURCE_DIR}/Data/${res}")
-  endforeach()
-
-  # Copy Sys folder
-  add_custom_command(TARGET dolphin-emu POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/Data/Sys" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Sys"
-  )
+  install(TARGETS dolphin-emu RUNTIME DESTINATION ${bindir})
 endif()
 
 if(USE_MGBA)
