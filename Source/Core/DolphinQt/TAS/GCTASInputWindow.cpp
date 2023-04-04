@@ -16,7 +16,9 @@
 #include "Core/HW/GCPad.h"
 #include "Core/HW/GCPadEmu.h"
 
+#include "DolphinQt/TAS/StickWidget.h"
 #include "DolphinQt/TAS/TASCheckBox.h"
+#include "DolphinQt/TAS/TASStickBox.h"
 
 #include "InputCommon/ControllerEmu/ControllerEmu.h"
 #include "InputCommon/InputConfig.h"
@@ -38,12 +40,12 @@ GCTASInputWindow::GCTASInputWindow(QWidget* parent, int controller_id)
   m_triggers_box = new QGroupBox(tr("Triggers"));
 
   auto* l_trigger_layout =
-      CreateSliderValuePairLayout(tr("Left"), GCPad::TRIGGERS_GROUP, GCPad::L_ANALOG, &m_overrider,
-                                  0, 0, 0, 255, Qt::Key_N, m_triggers_box);
+    CreateSliderValuePairLayout(tr("Left"), GCPad::TRIGGERS_GROUP, GCPad::L_ANALOG, &m_overrider,
+                                0, 0, 0, 255, Qt::Key_N, m_triggers_box);
 
   auto* r_trigger_layout =
-      CreateSliderValuePairLayout(tr("Right"), GCPad::TRIGGERS_GROUP, GCPad::R_ANALOG, &m_overrider,
-                                  0, 0, 0, 255, Qt::Key_M, m_triggers_box);
+    CreateSliderValuePairLayout(tr("Right"), GCPad::TRIGGERS_GROUP, GCPad::R_ANALOG, &m_overrider,
+                                0, 0, 0, 255, Qt::Key_M, m_triggers_box);
 
   auto* triggers_layout = new QVBoxLayout;
   triggers_layout->addLayout(l_trigger_layout);
@@ -51,30 +53,30 @@ GCTASInputWindow::GCTASInputWindow(QWidget* parent, int controller_id)
   m_triggers_box->setLayout(triggers_layout);
 
   m_a_button =
-      CreateButton(QStringLiteral("&A"), GCPad::BUTTONS_GROUP, GCPad::A_BUTTON, &m_overrider);
+    CreateButton(QStringLiteral("&A"), GCPad::BUTTONS_GROUP, GCPad::A_BUTTON, &m_overrider);
   m_b_button =
-      CreateButton(QStringLiteral("&B"), GCPad::BUTTONS_GROUP, GCPad::B_BUTTON, &m_overrider);
+    CreateButton(QStringLiteral("&B"), GCPad::BUTTONS_GROUP, GCPad::B_BUTTON, &m_overrider);
   m_x_button =
-      CreateButton(QStringLiteral("&X"), GCPad::BUTTONS_GROUP, GCPad::X_BUTTON, &m_overrider);
+    CreateButton(QStringLiteral("&X"), GCPad::BUTTONS_GROUP, GCPad::X_BUTTON, &m_overrider);
   m_y_button =
-      CreateButton(QStringLiteral("&Y"), GCPad::BUTTONS_GROUP, GCPad::Y_BUTTON, &m_overrider);
+    CreateButton(QStringLiteral("&Y"), GCPad::BUTTONS_GROUP, GCPad::Y_BUTTON, &m_overrider);
   m_z_button =
-      CreateButton(QStringLiteral("&Z"), GCPad::BUTTONS_GROUP, GCPad::Z_BUTTON, &m_overrider);
+    CreateButton(QStringLiteral("&Z"), GCPad::BUTTONS_GROUP, GCPad::Z_BUTTON, &m_overrider);
   m_start_button = CreateButton(QStringLiteral("&START"), GCPad::BUTTONS_GROUP, GCPad::START_BUTTON,
                                 &m_overrider);
 
   m_l_button =
-      CreateButton(QStringLiteral("&L"), GCPad::TRIGGERS_GROUP, GCPad::L_DIGITAL, &m_overrider);
+    CreateButton(QStringLiteral("&L"), GCPad::TRIGGERS_GROUP, GCPad::L_DIGITAL, &m_overrider);
   m_r_button =
-      CreateButton(QStringLiteral("&R"), GCPad::TRIGGERS_GROUP, GCPad::R_DIGITAL, &m_overrider);
+    CreateButton(QStringLiteral("&R"), GCPad::TRIGGERS_GROUP, GCPad::R_DIGITAL, &m_overrider);
 
   m_left_button =
-      CreateButton(QStringLiteral("L&eft"), GCPad::DPAD_GROUP, DIRECTION_LEFT, &m_overrider);
+    CreateButton(QStringLiteral("L&eft"), GCPad::DPAD_GROUP, DIRECTION_LEFT, &m_overrider);
   m_up_button = CreateButton(QStringLiteral("&Up"), GCPad::DPAD_GROUP, DIRECTION_UP, &m_overrider);
   m_down_button =
-      CreateButton(QStringLiteral("&Down"), GCPad::DPAD_GROUP, DIRECTION_DOWN, &m_overrider);
+    CreateButton(QStringLiteral("&Down"), GCPad::DPAD_GROUP, DIRECTION_DOWN, &m_overrider);
   m_right_button =
-      CreateButton(QStringLiteral("R&ight"), GCPad::DPAD_GROUP, DIRECTION_RIGHT, &m_overrider);
+    CreateButton(QStringLiteral("R&ight"), GCPad::DPAD_GROUP, DIRECTION_RIGHT, &m_overrider);
 
   auto* buttons_layout = new QGridLayout;
   buttons_layout->addWidget(m_a_button, 0, 0);

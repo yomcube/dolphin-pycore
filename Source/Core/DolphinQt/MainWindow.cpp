@@ -1839,6 +1839,7 @@ void MainWindow::ShowTASInput()
       m_gc_tas_input_windows[i]->show();
       m_gc_tas_input_windows[i]->raise();
       m_gc_tas_input_windows[i]->activateWindow();
+      m_gc_tas_input_windows[i]->setFocus();
     }
   }
 
@@ -1850,6 +1851,7 @@ void MainWindow::ShowTASInput()
       m_wii_tas_input_windows[i]->show();
       m_wii_tas_input_windows[i]->raise();
       m_wii_tas_input_windows[i]->activateWindow();
+      m_wii_tas_input_windows[i]->setFocus();
     }
   }
 }
