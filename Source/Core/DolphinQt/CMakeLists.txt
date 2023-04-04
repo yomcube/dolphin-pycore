@@ -135,8 +135,6 @@ add_executable(dolphin-emu
   Config/GraphicsModListWidget.h
   Config/GraphicsModWarningWidget.cpp
   Config/GraphicsModWarningWidget.h
-  Config/Graphics/SoftwareRendererWidget.cpp
-  Config/Graphics/SoftwareRendererWidget.h
   Config/InfoWidget.cpp
   Config/InfoWidget.h
   Config/LogConfigWidget.cpp
@@ -245,8 +243,6 @@ add_executable(dolphin-emu
   Debugger/MemoryWidget.h
   Debugger/NetworkWidget.cpp
   Debugger/NetworkWidget.h
-  Debugger/NewBreakpointDialog.cpp
-  Debugger/NewBreakpointDialog.h
   Debugger/PatchInstructionDialog.cpp
   Debugger/PatchInstructionDialog.h
   Debugger/RegisterColumn.cpp
@@ -296,8 +292,6 @@ add_executable(dolphin-emu
   NetPlay/GameDigestDialog.h
   NetPlay/GameListDialog.cpp
   NetPlay/GameListDialog.h
-  NetPlay/MD5Dialog.cpp
-  NetPlay/MD5Dialog.h
   NetPlay/NetPlayBrowser.cpp
   NetPlay/NetPlayBrowser.h
   NetPlay/NetPlayDialog.cpp
