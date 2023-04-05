@@ -7,6 +7,7 @@
 #include "Common/Profiler.h"
 #include "Common/Timer.h"
 
+#include "Core/API/Gui.h"
 #include "Core/Config/MainSettings.h"
 #include "Core/Config/NetplaySettings.h"
 #include "Core/Movie.h"
@@ -328,6 +329,7 @@ void OnScreenUI::Finalize()
   auto lock = GetImGuiLock();
 
   g_perf_metrics.DrawImGuiStats(m_backbuffer_scale);
+  API::GetGui().Render();
   DrawDebugText();
   OSD::DrawMessages();
   ImGui::Render();
