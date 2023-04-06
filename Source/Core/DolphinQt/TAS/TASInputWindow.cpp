@@ -100,7 +100,7 @@ TASCheckBox* TASInputWindow::CreateButton(const QString& text, std::string_view 
   TASCheckBox* checkbox = new TASCheckBox(text, this);
 
   overrider->AddFunction(group_name, control_name, [this, checkbox](ControlState controller_state) {
-      return GetButton(checkbox, controller_state);
+    return GetButton(checkbox, controller_state);
   });
 
   return checkbox;
@@ -115,9 +115,9 @@ TASStickBox* TASInputWindow::CreateStickInputs(const QString& text, std::string_
   const QKeySequence y_shortcut_key_sequence = QKeySequence(Qt::ALT | y_shortcut_key);
 
   auto* box =
-    new TASStickBox(QStringLiteral("%1 (%2/%3)")
-                      .arg(text, x_shortcut_key_sequence.toString(QKeySequence::NativeText),
-                           y_shortcut_key_sequence.toString(QKeySequence::NativeText)));
+      new TASStickBox(QStringLiteral("%1 (%2/%3)")
+                          .arg(text, x_shortcut_key_sequence.toString(QKeySequence::NativeText),
+                               y_shortcut_key_sequence.toString(QKeySequence::NativeText)));
 
   const int x_default = static_cast<int>(std::round(max_x / 2.));
   const int y_default = static_cast<int>(std::round(max_y / 2.));
@@ -156,18 +156,19 @@ TASStickBox* TASInputWindow::CreateStickInputs(const QString& text, std::string_
 
   overrider->AddFunction(group_name, ControllerEmu::ReshapableInput::X_INPUT_OVERRIDE,
                          [this, x_value, x_default, min_x, max_x](ControlState controller_state) {
-                          return GetSpinBox(x_value, x_default, min_x, max_x, controller_state);
+                           return GetSpinBox(x_value, x_default, min_x, max_x, controller_state);
                          });
 
   overrider->AddFunction(group_name, ControllerEmu::ReshapableInput::Y_INPUT_OVERRIDE,
                          [this, y_value, y_default, min_y, max_y](ControlState controller_state) {
-                          return GetSpinBox(y_value, y_default, min_y, max_y, controller_state);
+                           return GetSpinBox(y_value, y_default, min_y, max_y, controller_state);
                          });
 
   return box;
 }
 
-QBoxLayout* TASInputWindow::CreateSliderValuePairLayout(const QString& text, std::string_view group_name, std::string_view control_name,
+QBoxLayout* TASInputWindow::CreateSliderValuePairLayout(
+    const QString& text, std::string_view group_name, std::string_view control_name,
     InputOverrider* overrider, int zero, int default_, int min, int max, Qt::Key shortcut_key,
     QWidget* shortcut_widget, std::optional<ControlState> scale)
 {
@@ -186,10 +187,10 @@ QBoxLayout* TASInputWindow::CreateSliderValuePairLayout(const QString& text, std
 }
 
 TASSpinBox* TASInputWindow::CreateSliderValuePair(
-  std::string_view group_name, std::string_view control_name, InputOverrider* overrider,
-  QBoxLayout* layout, int zero, int default_, int min, int max,
-  QKeySequence shortcut_key_sequence, Qt::Orientation orientation, QWidget* shortcut_widget,
-  std::optional<ControlState> scale)
+    std::string_view group_name, std::string_view control_name, InputOverrider* overrider,
+    QBoxLayout* layout, int zero, int default_, int min, int max,
+    QKeySequence shortcut_key_sequence, Qt::Orientation orientation, QWidget* shortcut_widget,
+    std::optional<ControlState> scale)
 {
   TASSpinBox* value = CreateSliderValuePair(layout, default_, max, shortcut_key_sequence,
                                             orientation, shortcut_widget);
@@ -261,8 +262,8 @@ std::optional<ControlState> TASInputWindow::GetButton(TASCheckBox* checkbox,
   return checkbox->GetValue() ? 1.0 : 0.0;
 }
 
-std::optional<ControlState> TASInputWindow::GetSpinBox(TASSpinBox * spin, int zero, int min,
-                                                         int max, ControlState controller_state)
+std::optional<ControlState> TASInputWindow::GetSpinBox(TASSpinBox* spin, int zero, int min, int max,
+                                                       ControlState controller_state)
 {
   const int controller_value =
       ControllerEmu::EmulatedController::MapFloat<int>(controller_state, zero, 0, max);

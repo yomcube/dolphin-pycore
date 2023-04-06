@@ -47,7 +47,7 @@ WiiTASInputWindow::WiiTASInputWindow(QWidget* parent, int num) : TASInputWindow(
   const QKeySequence ir_y_shortcut_key_sequence = QKeySequence(Qt::ALT | Qt::Key_C);
 
   m_ir_box = new QGroupBox(QStringLiteral("%1 (%2/%3)")
-                              .arg(tr("IR"),
+                               .arg(tr("IR"),
                                     ir_x_shortcut_key_sequence.toString(QKeySequence::NativeText),
                                     ir_y_shortcut_key_sequence.toString(QKeySequence::NativeText)));
 
@@ -390,7 +390,7 @@ WiimoteEmu::Wiimote* WiiTASInputWindow::GetWiimote()
 ControllerEmu::Attachments* WiiTASInputWindow::GetAttachments()
 {
   return static_cast<ControllerEmu::Attachments*>(
-    GetWiimote()->GetWiimoteGroup(WiimoteEmu::WiimoteGroup::Attachments));
+      GetWiimote()->GetWiimoteGroup(WiimoteEmu::WiimoteGroup::Attachments));
 }
 
 WiimoteEmu::Extension* WiiTASInputWindow::GetExtension()
@@ -456,7 +456,7 @@ void WiiTASInputWindow::hideEvent(QHideEvent* event)
 
 void WiiTASInputWindow::showEvent(QShowEvent* event)
 {
-  WiimoteEmu::Wiimote *wiimote = GetWiimote();
+  WiimoteEmu::Wiimote* wiimote = GetWiimote();
 
   if (m_active_extension != WiimoteEmu::ExtensionNumber::CLASSIC)
     wiimote->SetInputOverrideFunction(m_wiimote_overrider.GetInputOverrideFunction());
