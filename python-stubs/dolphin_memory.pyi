@@ -1,6 +1,4 @@
-"""
-Module for interacting with the emulated machine's memory
-"""
+"""Module for interacting with the emulated machine's memory."""
 
 
 def read_u8(addr: int, /) -> int:
@@ -93,7 +91,17 @@ def read_f64(addr: int, /) -> float:
     """
 
 
-def write_u8(addr: int, value: int, /):
+def invalidate_icache(addr: int, size: int, /) -> None:
+    """
+    Invalidates JIT cached code between the address and address + size, \
+        forcing the JIT to refetch instructions instead of executing from its cache.
+
+    :param addr: memory address to start invalidation at
+    :param size: size of the cache as integer
+    """
+
+
+def write_u8(addr: int, value: int, /) -> None:
     """
     Writes an unsigned integer to 1 byte.
     Overflowing values are truncated.
@@ -103,7 +111,7 @@ def write_u8(addr: int, value: int, /):
     """
 
 
-def write_u16(addr: int, value: int, /):
+def write_u16(addr: int, value: int, /) -> None:
     """
     Writes an unsigned integer to 2 bytes.
     Overflowing values are truncated.
@@ -113,7 +121,7 @@ def write_u16(addr: int, value: int, /):
     """
 
 
-def write_u32(addr: int, value: int, /):
+def write_u32(addr: int, value: int, /) -> None:
     """
     Writes an unsigned integer to 4 bytes.
     Overflowing values are truncated.
@@ -123,7 +131,7 @@ def write_u32(addr: int, value: int, /):
     """
 
 
-def write_u64(addr: int, value: int, /):
+def write_u64(addr: int, value: int, /) -> None:
     """
     Writes an unsigned integer to 8 bytes.
     Overflowing values are truncated.
@@ -133,7 +141,7 @@ def write_u64(addr: int, value: int, /):
     """
 
 
-def write_s8(addr: int, value: int, /):
+def write_s8(addr: int, value: int, /) -> None:
     """
     Writes a signed integer to 1 byte.
     Overflowing values are truncated.
@@ -143,7 +151,7 @@ def write_s8(addr: int, value: int, /):
     """
 
 
-def write_s16(addr: int, value: int, /):
+def write_s16(addr: int, value: int, /) -> None:
     """
     Writes a signed integer to 2 bytes.
     Overflowing values are truncated.
@@ -153,7 +161,7 @@ def write_s16(addr: int, value: int, /):
     """
 
 
-def write_s32(addr: int, value: int, /):
+def write_s32(addr: int, value: int, /) -> None:
     """
     Writes a signed integer to 4 bytes.
     Overflowing values are truncated.
@@ -163,7 +171,7 @@ def write_s32(addr: int, value: int, /):
     """
 
 
-def write_s64(addr: int, value: int, /):
+def write_s64(addr: int, value: int, /) -> None:
     """
     Writes a signed integer to 8 bytes.
     Overflowing values are truncated.
@@ -173,7 +181,7 @@ def write_s64(addr: int, value: int, /):
     """
 
 
-def write_f32(addr: int, value: float, /):
+def write_f32(addr: int, value: float, /) -> None:
     """
     Writes a floating point number to 4 bytes.
     Overflowing values are truncated.
@@ -183,7 +191,7 @@ def write_f32(addr: int, value: float, /):
     """
 
 
-def write_f64(addr: int, value: float, /):
+def write_f64(addr: int, value: float, /) -> None:
     """
     Writes a floating point number to 8 bytes.
     Overflowing values are truncated.
