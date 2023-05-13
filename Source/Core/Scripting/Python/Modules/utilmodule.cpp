@@ -7,6 +7,7 @@
 #include "Common/Config/Config.h"
 #include "Core/Config/MainSettings.h"
 #include "Core/Core.h"
+#include "Core/ConfigManager.h"
 #include "Scripting/Python/Utils/module.h"
 #include "Scripting/Python/Utils/as_py_func.h"
 
@@ -16,6 +17,11 @@ struct FileState
 };
 
 static std::string scriptDir;
+
+static PyObject* get_game_id(PyObject* module, PyObject* args)
+{
+  return Py_BuildValue("s", SConfig::GetInstance().GetGameID().c_str());
+}
 
 static PyObject* get_script_dir(PyObject* module, PyObject* args)
 {
@@ -41,7 +47,6 @@ static PyObject* is_framedumping(PyObject* module, PyObject* args)
   Py_RETURN_FALSE;
 }
 
-// 
 static PyObject* start_audiodump(PyObject* module, PyObject* args)
 {
   Config::SetBaseOrCurrent(Config::MAIN_DUMP_AUDIO, true);
@@ -104,8 +109,9 @@ static void setup_file_module(PyObject* module, FileState* state)
 PyMODINIT_FUNC PyInit_dol_utils()
 {
   scriptDir = File::GetUserPath(D_LOAD_IDX) + "Scripts";
-  static PyMethodDef methods[] = {{"get_script_dir", get_script_dir, METH_NOARGS, ""},
-  								  {"open_file", open_file, METH_NOARGS, ""},
+  static PyMethodDef methods[] = {{"get_game_id", get_game_id, METH_NOARGS, ""},
+                                  {"get_script_dir", get_script_dir, METH_NOARGS, ""},
+                                  {"open_file", open_file, METH_NOARGS, ""},
                                   {"start_framedump", start_framedump, METH_NOARGS, ""},
                                   {"stop_framedump", stop_framedump, METH_NOARGS, ""},
                                   {"is_framedumping", is_framedumping, METH_NOARGS, ""},
