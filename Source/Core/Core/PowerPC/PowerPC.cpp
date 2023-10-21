@@ -18,6 +18,7 @@
 #include "Common/FloatUtils.h"
 #include "Common/Logging/Log.h"
 
+#include "Core/API/Events.h"
 #include "Core/Config/MainSettings.h"
 #include "Core/ConfigManager.h"
 #include "Core/Core.h"
@@ -642,6 +643,8 @@ void PowerPCManager::CheckBreakPoints()
     m_system.GetCPU().Break();
     if (GDBStub::IsActive())
       GDBStub::TakeControl();
+
+    API::GetEventHub().EmitEvent(API::Events::CodeBreakpoint{m_ppc_state.pc});
   }
   if (bp->log_on_hit)
   {
