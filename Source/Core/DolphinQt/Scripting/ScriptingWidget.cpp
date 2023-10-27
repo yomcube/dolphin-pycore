@@ -89,6 +89,9 @@ ScriptingWidget::ScriptingWidget(QWidget* parent)
 
   connect(&Settings::Instance(), &Settings::EmulationStateChanged, this,
           [this](Core::State state) { OnEmulationStateChanged(state); });
+
+  connect(m_scripts_model, &ScriptsFileSystemModel::dataChanged, this,
+          &ScriptingWidget::OnDataChanged);
 }
 
 void ScriptingWidget::UpdateIcons()
@@ -171,7 +174,7 @@ void ScriptingWidget::OnEmulationStateChanged(Core::State state)
 
     if (!QDir(QString::fromStdString(path)).exists())
       return;
-
+    
     QModelIndex rootIdx = m_scripts_model->setRootPath(QString::fromStdString(path));
     m_tree->setRootIndex(rootIdx);
 
@@ -194,4 +197,15 @@ void ScriptingWidget::OnEmulationStateChanged(Core::State state)
   default:
     break;
   }  
+}
+
+void ScriptingWidget::OnDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight,
+                                    const QList<int>& roles)
+{
+  Q_ASSERT(topLeft == bottomRight);
+
+  if (!roles.contains(Qt::CheckStateRole))
+    return;
+
+  m_tree->setCurrentIndex(topLeft);
 }
