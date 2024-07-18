@@ -1,0 +1,39 @@
+name: 'Build'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Packages
+        run: |
+          sudo apt install build-essential git cmake ffmpeg libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libevdev-dev libusb-1.0-0-dev libxrandr-dev libxi-dev libpangocairo-1.0-0 qt6-base-private-dev libqt6svg6-dev libbluetooth-dev libasound2-dev libpulse-dev libgl1-mesa-dev libcurl4-openssl-dev
+          sudo apt install libudev-dev libsystemd-dev || sudo apt install libeudev-dev
+
+      - name: Build Linux x64
+        run: |
+          mkdir build && cd build
+          cmake .. -DLINUX_LOCAL_DEV=true
+          make -j$(nproc)
+          ln -s ../../Data/Sys Binaries/
+          tar -czf Linux_x64.tar.gz "Binaries"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux_x64.tar.gz
+          path: Linux_x64.tar.gz
+          
