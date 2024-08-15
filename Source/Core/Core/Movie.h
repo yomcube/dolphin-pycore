@@ -5,6 +5,7 @@
 
 #include <array>
 #include <cstring>
+#include <functional>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -236,6 +237,20 @@ private:
   u32 m_rerecords = 0;
   PlayMode m_play_mode = PlayMode::None;
 
+  // Done this way to avoid mixing of core and gui code
+  using GCManipFunction = std::function<void(GCPadStatus*, int)>;
+  using WiiManipFunction = std::function<void(WiimoteCommon::DataReportBuilder&, int, int,
+                                              const WiimoteEmu::EncryptionKey&)>;
+
+  GCManipFunction m_gc_manip_func;
+  WiiManipFunction m_wii_manip_func;
+
+  void SetGCInputManip(GCManipFunction);
+  void SetWiiInputManip(WiiManipFunction);
+  void CallGCInputManip(GCPadStatus* PadStatus, int controllerID);
+  void CallWiiInputManip(WiimoteCommon::DataReportBuilder& rpt, int controllerID, int ext,
+                         const WiimoteEmu::EncryptionKey& key);
+
   std::array<ControllerType, 4> m_controllers{};
   std::array<bool, 4> m_wiimotes{};
   ControllerState m_pad_state{};
@@ -276,5 +291,4 @@ private:
 
   Core::System& m_system;
 };
-
 }  // namespace Movie

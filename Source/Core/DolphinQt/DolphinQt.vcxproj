@@ -13,6 +13,7 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VSPropsDir)Base.props" />
+    <Import Project="$(VSPropsDir)PyEmbed.props" />
     <Import Project="$(VSPropsDir)Base.Dolphin.props" />
     <Import Project="$(VSPropsDir)QtCompile.props" />
   </ImportGroup>
@@ -28,6 +29,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)GameList;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories>$(ProjectDir)NetPlay;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories>$(ProjectDir)QtUtils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Scripting;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories>$(ProjectDir)Settings;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories>$(ProjectDir)TAS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories>$(ProjectDir)VideoInterface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -100,8 +102,8 @@
     <ClCompile Include="Config\Mapping\Hotkey3D.cpp" />
     <ClCompile Include="Config\Mapping\HotkeyControllerProfile.cpp" />
     <ClCompile Include="Config\Mapping\HotkeyDebugging.cpp" />
-    <ClCompile Include="Config\Mapping\HotkeyGBA.cpp" />
     <ClCompile Include="Config\Mapping\HotkeyGeneral.cpp" />
+    <ClCompile Include="Config\Mapping\HotkeyGBA.cpp" />
     <ClCompile Include="Config\Mapping\HotkeyGraphics.cpp" />
     <ClCompile Include="Config\Mapping\HotkeyStates.cpp" />
     <ClCompile Include="Config\Mapping\HotkeyStatesOther.cpp" />
@@ -204,6 +206,8 @@
     <ClCompile Include="ResourcePackManager.cpp" />
     <ClCompile Include="Resources.cpp" />
     <ClCompile Include="RiivolutionBootWidget.cpp" />
+    <ClCompile Include="Scripting/ScriptingWidget.cpp" />
+    <ClCompile Include="Scripting/ScriptsListModel.cpp" />
     <ClCompile Include="SearchBar.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Settings\AdvancedPane.cpp" />
@@ -226,6 +230,7 @@
     <ClCompile Include="TAS\TASControlState.cpp" />
     <ClCompile Include="TAS\TASSlider.cpp" />
     <ClCompile Include="TAS\TASSpinBox.cpp" />
+    <ClCompile Include="TAS\TASStickBox.cpp" />
     <ClCompile Include="TAS\WiiTASInputWindow.cpp" />
     <ClCompile Include="ToolBar.cpp" />
     <ClCompile Include="Translation.cpp" />
@@ -261,6 +266,7 @@
     <ClInclude Include="Resources.h" />
     <ClInclude Include="SkylanderPortal\SkylanderModifyDialog.h" />
     <ClInclude Include="TAS\TASControlState.h" />
+    <ClInclude Include="TAS\TASStickBox.h" />
     <ClInclude Include="TAS\TASSlider.h" />
     <ClInclude Include="Translation.h" />
     <ClInclude Include="WiiUpdate.h" />
@@ -406,6 +412,7 @@
     <QtMoc Include="QtUtils\WindowActivationEventFilter.h" />
     <QtMoc Include="RenderWidget.h" />
     <QtMoc Include="RiivolutionBootWidget.h" />
+    <QtMoc Include="Scripting/ScriptingWidget.h" />
     <QtMoc Include="SearchBar.h" />
     <QtMoc Include="Settings.h" />
     <QtMoc Include="Settings\AdvancedPane.h" />
@@ -451,6 +458,9 @@
     </ProjectReference>
     <ProjectReference Include="$(DolphinRootDir)Languages\Languages.vcxproj">
       <Project>{0e033be3-2e08-428e-9ae9-bc673efa12b5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="$(CoreDir)Scripting\Scripting.vcxproj">
+      <Project>{83794107-D372-4804-B463-E2719B50FB6B}</Project>
     </ProjectReference>
     <!--
       This project uses its own PCH during compile (because RTTI setting differs),

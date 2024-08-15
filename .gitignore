@@ -8,6 +8,7 @@ Source/Core/Common/scmrev.h
 # Ignore files output by build
 /cmake-build-debug
 /cmake-build-release
+/cmake-build-relwithdebinfo
 /[Bb]uild*/
 /[Bb]inary*/
 /obj/

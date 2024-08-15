@@ -45,7 +45,7 @@ const Info<bool> MAIN_ACCURATE_CPU_CACHE{{System::Main, "Core", "AccurateCPUCach
 const Info<bool> MAIN_DSP_HLE{{System::Main, "Core", "DSPHLE"}, true};
 const Info<int> MAIN_MAX_FALLBACK{{System::Main, "Core", "MaxFallback"}, 100};
 const Info<int> MAIN_TIMING_VARIANCE{{System::Main, "Core", "TimingVariance"}, 40};
-const Info<bool> MAIN_CPU_THREAD{{System::Main, "Core", "CPUThread"}, true};
+const Info<bool> MAIN_CPU_THREAD{{System::Main, "Core", "CPUThread"}, false};
 const Info<bool> MAIN_SYNC_ON_SKIP_IDLE{{System::Main, "Core", "SyncOnSkipIdle"}, true};
 const Info<std::string> MAIN_DEFAULT_ISO{{System::Main, "Core", "DefaultISO"}, ""};
 const Info<bool> MAIN_ENABLE_CHEATS{{System::Main, "Core", "EnableCheats"}, false};
@@ -265,6 +265,8 @@ const Info<int> MAIN_RENDER_WINDOW_WIDTH{{System::Main, "Display", "RenderWindow
 const Info<int> MAIN_RENDER_WINDOW_HEIGHT{{System::Main, "Display", "RenderWindowHeight"}, 480};
 const Info<bool> MAIN_RENDER_WINDOW_AUTOSIZE{{System::Main, "Display", "RenderWindowAutoSize"},
                                              false};
+const Info<bool> MAIN_RENDER_WINDOW_LOCK_RIGHT{{System::Main, "Display", "RenderWindowLockRight"},
+                                               true};
 const Info<bool> MAIN_KEEP_WINDOW_ON_TOP{{System::Main, "Display", "KeepWindowOnTop"}, false};
 const Info<bool> MAIN_DISABLE_SCREENSAVER{{System::Main, "Display", "DisableScreenSaver"}, true};
 
@@ -405,6 +407,10 @@ const Info<std::string> MAIN_THEME_NAME{{System::Main, "Interface", "ThemeName"}
                                         DEFAULT_THEME_DIR};
 const Info<bool> MAIN_PAUSE_ON_FOCUS_LOST{{System::Main, "Interface", "PauseOnFocusLost"}, false};
 const Info<bool> MAIN_ENABLE_DEBUGGING{{System::Main, "Interface", "DebugModeEnabled"}, false};
+const Info<int> MAIN_IMGUI_FONT_SIZE{{System::Main, "Interface", "ImguiFontSize"}, 14};
+const Info<std::string> MAIN_IMGUI_FONT{{System::Main, "Interface", "ImguiFont"}, "Default"};
+const Info<OutlineRes> MAIN_IMGUI_OUTLINE_RES{{System::Main, "Interface", "ImguiOutline"},
+                                              OutlineRes::Off};
 
 // Main.Analytics
 

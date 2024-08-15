@@ -3,6 +3,16 @@ add_library(core
   AchievementManager.h
   ActionReplay.cpp
   ActionReplay.h
+  API/Controller.cpp
+  API/Controller.h
+  API/Events.cpp
+  API/Events.h
+  API/Memory.cpp
+  API/Memory.h
+  API/Gui.cpp
+  API/Gui.h
+  API/Registers.cpp
+  API/Registers.h
   ARDecrypt.cpp
   ARDecrypt.h
   Boot/AncastTypes.h
@@ -638,6 +648,7 @@ PUBLIC
   MbedTLS::mbedtls
   pugixml
   RangeSet::RangeSet
+  scripting
   sfml-network
   videonull
   videoogl
@@ -646,6 +657,7 @@ PUBLIC
 PRIVATE
   cubeb::cubeb
   FatFs
+  imgui # TODO imgui shouldn't be here
   fmt::fmt
   LZO::LZO
   LZ4::LZ4

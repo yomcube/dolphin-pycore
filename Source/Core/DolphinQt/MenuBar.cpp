@@ -433,6 +433,13 @@ void MenuBar::UpdateStateSlotMenu()
 void MenuBar::AddViewMenu()
 {
   QMenu* view_menu = addMenu(tr("&View"));
+
+  QAction* show_scripting = view_menu->addAction(tr("&Scripting"));
+  show_scripting->setCheckable(true);
+  show_scripting->setChecked(Settings::Instance().IsScriptingVisible());
+
+  connect(show_scripting, &QAction::toggled, &Settings::Instance(), &Settings::SetScriptingVisible);
+
   QAction* show_log = view_menu->addAction(tr("Show &Log"));
   show_log->setCheckable(true);
   show_log->setChecked(Settings::Instance().IsLogVisible());
@@ -452,6 +459,8 @@ void MenuBar::AddViewMenu()
 
   connect(show_toolbar, &QAction::toggled, &Settings::Instance(), &Settings::SetToolBarVisible);
 
+  connect(&Settings::Instance(), &Settings::ScriptingVisibilityChanged, show_scripting,
+          &QAction::setChecked);
   connect(&Settings::Instance(), &Settings::LogVisibilityChanged, show_log, &QAction::setChecked);
   connect(&Settings::Instance(), &Settings::LogConfigVisibilityChanged, show_log_config,
           &QAction::setChecked);
@@ -1297,7 +1306,7 @@ void MenuBar::ClearSymbols()
     return;
 
   Core::System::GetInstance().GetPPCSymbolDB().Clear();
-  emit Host::GetInstance()->PPCSymbolsChanged();
+  emit Host::GetInstance() -> PPCSymbolsChanged();
 }
 
 void MenuBar::GenerateSymbolsFromAddress()
@@ -1310,7 +1319,7 @@ void MenuBar::GenerateSymbolsFromAddress()
 
   PPCAnalyst::FindFunctions(guard, Memory::MEM1_BASE_ADDR,
                             Memory::MEM1_BASE_ADDR + memory.GetRamSizeReal(), &ppc_symbol_db);
-  emit Host::GetInstance()->PPCSymbolsChanged();
+  emit Host::GetInstance() -> PPCSymbolsChanged();
 }
 
 void MenuBar::GenerateSymbolsFromSignatureDB()
@@ -1339,7 +1348,7 @@ void MenuBar::GenerateSymbolsFromSignatureDB()
         tr("'%1' not found, no symbol names generated").arg(QString::fromStdString(TOTALDB)));
   }
 
-  emit Host::GetInstance()->PPCSymbolsChanged();
+  emit Host::GetInstance() -> PPCSymbolsChanged();
 }
 
 void MenuBar::GenerateSymbolsFromRSO()
@@ -1369,7 +1378,7 @@ void MenuBar::GenerateSymbolsFromRSO()
   if (rso_chain.Load(guard, static_cast<u32>(address)))
   {
     rso_chain.Apply(guard, &system.GetPPCSymbolDB());
-    emit Host::GetInstance()->PPCSymbolsChanged();
+    emit Host::GetInstance() -> PPCSymbolsChanged();
   }
   else
   {
@@ -1426,7 +1435,7 @@ void MenuBar::GenerateSymbolsFromRSOAuto()
   if (rso_chain.Load(guard, address))
   {
     rso_chain.Apply(guard, &system.GetPPCSymbolDB());
-    emit Host::GetInstance()->PPCSymbolsChanged();
+    emit Host::GetInstance() -> PPCSymbolsChanged();
   }
   else
   {
@@ -1576,7 +1585,7 @@ void MenuBar::LoadSymbolMap()
   }
 
   HLE::PatchFunctions(system);
-  emit Host::GetInstance()->PPCSymbolsChanged();
+  emit Host::GetInstance() -> PPCSymbolsChanged();
 }
 
 void MenuBar::SaveSymbolMap()
@@ -1601,7 +1610,7 @@ void MenuBar::LoadOtherSymbolMap()
 
   auto& system = Core::System::GetInstance();
   HLE::PatchFunctions(system);
-  emit Host::GetInstance()->PPCSymbolsChanged();
+  emit Host::GetInstance() -> PPCSymbolsChanged();
 }
 
 void MenuBar::LoadBadSymbolMap()
@@ -1618,7 +1627,7 @@ void MenuBar::LoadBadSymbolMap()
 
   auto& system = Core::System::GetInstance();
   HLE::PatchFunctions(system);
-  emit Host::GetInstance()->PPCSymbolsChanged();
+  emit Host::GetInstance() -> PPCSymbolsChanged();
 }
 
 void MenuBar::SaveSymbolMapAs()
@@ -1743,7 +1752,7 @@ void MenuBar::ApplySignatureFile()
   db.Apply(Core::CPUThreadGuard{system}, &system.GetPPCSymbolDB());
   db.List();
   HLE::PatchFunctions(system);
-  emit Host::GetInstance()->PPCSymbolsChanged();
+  emit Host::GetInstance() -> PPCSymbolsChanged();
 }
 
 void MenuBar::CombineSignatureFiles()

@@ -8,7 +8,9 @@
 class ConfigBool;
 class ConfigRadioInt;
 class ConfigStringChoice;
+class QComboBox;
 class QLabel;
+class QSlider;
 class QVBoxLayout;
 class ToolTipCheckBox;
 class ToolTipComboBox;
@@ -52,4 +54,9 @@ private:
   ConfigRadioInt* m_radio_cursor_visible_never;
   ConfigRadioInt* m_radio_cursor_visible_always;
   ConfigBool* m_checkbox_lock_mouse;
+
+  QSlider* m_imgui_font_size_slider;
+  QLabel* m_imgui_font_label;
+  QComboBox* m_imgui_font_combobox;
+  QComboBox* m_imgui_outline_combobox;
 };

@@ -27,6 +27,7 @@
 #include "DolphinQt/TAS/TASCheckBox.h"
 #include "DolphinQt/TAS/TASSlider.h"
 #include "DolphinQt/TAS/TASSpinBox.h"
+#include "DolphinQt/TAS/TASStickBox.h"
 
 #include "InputCommon/ControllerEmu/ControllerEmu.h"
 #include "InputCommon/ControllerEmu/StickGate.h"
@@ -48,7 +49,8 @@ ControllerEmu::InputOverrideFunction InputOverrider::GetInputOverrideFunction() 
 
 TASInputWindow::TASInputWindow(QWidget* parent) : QDialog(parent)
 {
-  setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+  setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint | Qt::WindowStaysOnTopHint |
+                 Qt::WindowMinimizeButtonHint);
   setWindowIcon(Resources::GetAppIcon());
 
   QGridLayout* settings_layout = new QGridLayout;
@@ -58,20 +60,33 @@ TASInputWindow::TASInputWindow(QWidget* parent) : QDialog(parent)
                                   "random. In some cases this can be fixed by adding a deadzone."));
   settings_layout->addWidget(m_use_controller, 0, 0, 1, 2);
 
-  QLabel* turbo_press_label = new QLabel(tr("Duration of Turbo Button Press (frames):"));
+  m_toggle_lines = new QCheckBox(QStringLiteral("Enable Axis Lines"));
+  settings_layout->addWidget(m_toggle_lines, 1, 0, 1, 2);
+
+  auto* turbo_box = new QGroupBox(tr("Turbo"));
+  settings_layout->addWidget(turbo_box, 2, 0);
+
+  QGridLayout* turbo_layout = new QGridLayout;
+
+  QLabel* turbo_press_label = new QLabel(tr("Press:"));
   m_turbo_press_frames = new QSpinBox();
   m_turbo_press_frames->setMinimum(1);
-  settings_layout->addWidget(turbo_press_label, 1, 0);
-  settings_layout->addWidget(m_turbo_press_frames, 1, 1);
+  turbo_layout->addWidget(turbo_press_label, 0, 0);
+  turbo_layout->addWidget(m_turbo_press_frames, 0, 1);
 
-  QLabel* turbo_release_label = new QLabel(tr("Duration of Turbo Button Release (frames):"));
+  QLabel* turbo_release_label = new QLabel(tr("Release:"));
   m_turbo_release_frames = new QSpinBox();
   m_turbo_release_frames->setMinimum(1);
-  settings_layout->addWidget(turbo_release_label, 2, 0);
-  settings_layout->addWidget(m_turbo_release_frames, 2, 1);
+
+  turbo_layout->addWidget(turbo_release_label, 1, 0);
+  turbo_layout->addWidget(m_turbo_release_frames, 1, 1);
+
+  turbo_box->setLayout(turbo_layout);
 
   m_settings_box = new QGroupBox(tr("Settings"));
   m_settings_box->setLayout(settings_layout);
+
+  installEventFilter(this);
 }
 
 int TASInputWindow::GetTurboPressFrames() const
@@ -96,18 +111,18 @@ TASCheckBox* TASInputWindow::CreateButton(const QString& text, std::string_view 
   return checkbox;
 }
 
-QGroupBox* TASInputWindow::CreateStickInputs(const QString& text, std::string_view group_name,
-                                             InputOverrider* overrider, int min_x, int min_y,
-                                             int max_x, int max_y, Qt::Key x_shortcut_key,
-                                             Qt::Key y_shortcut_key)
+TASStickBox* TASInputWindow::CreateStickInputs(const QString& text, std::string_view group_name,
+                                               InputOverrider* overrider, int min_x, int min_y,
+                                               int max_x, int max_y, Qt::Key x_shortcut_key,
+                                               Qt::Key y_shortcut_key)
 {
   const QKeySequence x_shortcut_key_sequence = QKeySequence(Qt::ALT | x_shortcut_key);
   const QKeySequence y_shortcut_key_sequence = QKeySequence(Qt::ALT | y_shortcut_key);
 
   auto* box =
-      new QGroupBox(QStringLiteral("%1 (%2/%3)")
-                        .arg(text, x_shortcut_key_sequence.toString(QKeySequence::NativeText),
-                             y_shortcut_key_sequence.toString(QKeySequence::NativeText)));
+      new TASStickBox(QStringLiteral("%1 (%2/%3)")
+                          .arg(text, x_shortcut_key_sequence.toString(QKeySequence::NativeText),
+                               y_shortcut_key_sequence.toString(QKeySequence::NativeText)));
 
   const int x_default = static_cast<int>(std::round(max_x / 2.));
   const int y_default = static_cast<int>(std::round(max_y / 2.));
@@ -119,11 +134,13 @@ QGroupBox* TASInputWindow::CreateStickInputs(const QString& text, std::string_vi
   auto* y_layout = new QVBoxLayout;
   TASSpinBox* y_value =
       CreateSliderValuePair(y_layout, y_default, max_y, y_shortcut_key_sequence, Qt::Vertical, box);
-  y_value->setMaximumWidth(60);
 
   auto* visual = new StickWidget(this, max_x, max_y);
+  box->SetStickWidget(visual);
   visual->SetX(x_default);
   visual->SetY(y_default);
+  visual->setMinimumHeight(100);
+  visual->setMinimumWidth(100);
 
   connect(x_value, &QSpinBox::valueChanged, visual, &StickWidget::SetX);
   connect(y_value, &QSpinBox::valueChanged, visual, &StickWidget::SetY);
@@ -140,6 +157,7 @@ QGroupBox* TASInputWindow::CreateStickInputs(const QString& text, std::string_vi
   layout->addLayout(x_layout);
   layout->addLayout(visual_layout);
   box->setLayout(layout);
+  box->setMinimumWidth(150);
 
   overrider->AddFunction(group_name, ControllerEmu::ReshapableInput::X_INPUT_OVERRIDE,
                          [this, x_value, x_default, min_x, max_x](ControlState controller_state) {
@@ -201,8 +219,6 @@ TASSpinBox* TASInputWindow::CreateSliderValuePair(
   return value;
 }
 
-// The shortcut_widget argument needs to specify the container widget that will be hidden/shown.
-// This is done to avoid ambigous shortcuts
 TASSpinBox* TASInputWindow::CreateSliderValuePair(QBoxLayout* layout, int default_, int max,
                                                   QKeySequence shortcut_key_sequence,
                                                   Qt::Orientation orientation,
@@ -211,6 +227,8 @@ TASSpinBox* TASInputWindow::CreateSliderValuePair(QBoxLayout* layout, int defaul
   auto* value = new TASSpinBox();
   value->setRange(0, 99999);
   value->setValue(default_);
+  value->setButtonSymbols(QAbstractSpinBox::NoButtons);
+  value->setMaximumWidth(40);
   connect(value, &QSpinBox::valueChanged, [value, max](int i) {
     if (i > max)
       value->setValue(max);
@@ -233,6 +251,8 @@ TASSpinBox* TASInputWindow::CreateSliderValuePair(QBoxLayout* layout, int defaul
   layout->addWidget(value);
   if (orientation == Qt::Vertical)
     layout->setAlignment(slider, Qt::AlignRight);
+
+  slider->setMinimumHeight(10);
 
   return value;
 }

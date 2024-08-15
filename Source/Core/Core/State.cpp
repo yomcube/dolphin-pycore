@@ -34,6 +34,7 @@
 #include "Common/Version.h"
 #include "Common/WorkQueueThread.h"
 
+#include "Core/API/Events.h"
 #include "Core/AchievementManager.h"
 #include "Core/Config/AchievementSettings.h"
 #include "Core/ConfigManager.h"
@@ -852,6 +853,22 @@ static void LoadFileStateData(const std::string& filename, std::vector<u8>& ret_
   ret_data.swap(buffer);
 }
 
+// Malleo - We want to emit an API event on savestate load/save.
+// Slot loads/saves first pass through Load()/Save() and then LoadAs()/SaveAs(),
+// whereas file loads/saves ONLY pass through LoadAs()/SaveAs().
+// To catch both scenarios, we want to first pass file loads/saves through a separate function.
+void LoadFile(Core::System& system, const std::string& filename)
+{
+  LoadAs(system, filename);
+  API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{false, -1});
+}
+
+void SaveFile(Core::System& system, const std::string& filename, bool wait)
+{
+  SaveAs(system, filename, wait);
+  API::GetEventHub().EmitEvent(API::Events::SaveStateSave{false, -1});
+}
+
 void LoadAs(Core::System& system, const std::string& filename)
 {
   if (!Core::IsRunningOrStarting(system))
@@ -978,11 +995,13 @@ static std::string MakeStateFilename(int number)
 void Save(Core::System& system, int slot, bool wait)
 {
   SaveAs(system, MakeStateFilename(slot), wait);
+  API::GetEventHub().EmitEvent(API::Events::SaveStateSave{true, slot});
 }
 
 void Load(Core::System& system, int slot)
 {
   LoadAs(system, MakeStateFilename(slot));
+  API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{true, slot});
 }
 
 void LoadLastSaved(Core::System& system, int i)
