@@ -625,8 +625,11 @@ void CommandProcessorManager::SetCpClearRegister()
 {
 }
 
-void CommandProcessorManager::HandleUnknownOpcode(u8 cmd_byte, const u8* buffer, bool preprocess)
+void CommandProcessorManager::HandleUnknownOpcode(Core::System& system, u8 cmd_byte,
+                                                  const u8* buffer, bool preprocess)
 {
+  const auto& fifo = m_fifo;
+
   // Datel software uses 0x01 during startup, and Mario Party 5's Wiggler capsule accidentally uses
   // 0x01-0x03 due to sending 4 more vertices than intended (see https://dolp.in/i8104).
   // Prince of Persia: Rival Swords sends 0x3f if the home menu is opened during the intro cutscene
@@ -651,7 +654,7 @@ void CommandProcessorManager::HandleUnknownOpcode(u8 cmd_byte, const u8* buffer,
   // PC and LR are meaningless when using the fifoplayer, and will generally not be helpful if the
   // unknown opcode is inside of a display list.  Also note that the changes in GPFifo.h are not
   // accurate and may introduce timing issues.
-  const auto& ppc_state = m_system.GetPPCState();
+  const auto& ppc_state = system.GetPPCState();
   GENERIC_LOG_FMT(
       Common::Log::LogType::VIDEO, log_level,
       "FIFO: Unknown Opcode {:#04x} @ {}, preprocessing = {}, CPBase: {:#010x}, CPEnd: "
@@ -661,19 +664,19 @@ void CommandProcessorManager::HandleUnknownOpcode(u8 cmd_byte, const u8* buffer,
       "{}, bFF_GPLinkEnable: {}, bFF_HiWatermarkInt: {}, bFF_LoWatermarkInt: {}, "
       "approximate PC: {:08x}, approximate LR: {:08x}",
       cmd_byte, fmt::ptr(buffer), preprocess ? "yes" : "no",
-      m_fifo.CPBase.load(std::memory_order_relaxed), m_fifo.CPEnd.load(std::memory_order_relaxed),
-      m_fifo.CPHiWatermark, m_fifo.CPLoWatermark,
-      m_fifo.CPReadWriteDistance.load(std::memory_order_relaxed),
-      m_fifo.CPWritePointer.load(std::memory_order_relaxed),
-      m_fifo.CPReadPointer.load(std::memory_order_relaxed),
-      m_fifo.CPBreakpoint.load(std::memory_order_relaxed),
-      m_fifo.bFF_GPReadEnable.load(std::memory_order_relaxed) ? "true" : "false",
-      m_fifo.bFF_BPEnable.load(std::memory_order_relaxed) ? "true" : "false",
-      m_fifo.bFF_BPInt.load(std::memory_order_relaxed) ? "true" : "false",
-      m_fifo.bFF_Breakpoint.load(std::memory_order_relaxed) ? "true" : "false",
-      m_fifo.bFF_GPLinkEnable.load(std::memory_order_relaxed) ? "true" : "false",
-      m_fifo.bFF_HiWatermarkInt.load(std::memory_order_relaxed) ? "true" : "false",
-      m_fifo.bFF_LoWatermarkInt.load(std::memory_order_relaxed) ? "true" : "false", ppc_state.pc,
+      fifo.CPBase.load(std::memory_order_relaxed), fifo.CPEnd.load(std::memory_order_relaxed),
+      fifo.CPHiWatermark, fifo.CPLoWatermark,
+      fifo.CPReadWriteDistance.load(std::memory_order_relaxed),
+      fifo.CPWritePointer.load(std::memory_order_relaxed),
+      fifo.CPReadPointer.load(std::memory_order_relaxed),
+      fifo.CPBreakpoint.load(std::memory_order_relaxed),
+      fifo.bFF_GPReadEnable.load(std::memory_order_relaxed) ? "true" : "false",
+      fifo.bFF_BPEnable.load(std::memory_order_relaxed) ? "true" : "false",
+      fifo.bFF_BPInt.load(std::memory_order_relaxed) ? "true" : "false",
+      fifo.bFF_Breakpoint.load(std::memory_order_relaxed) ? "true" : "false",
+      fifo.bFF_GPLinkEnable.load(std::memory_order_relaxed) ? "true" : "false",
+      fifo.bFF_HiWatermarkInt.load(std::memory_order_relaxed) ? "true" : "false",
+      fifo.bFF_LoWatermarkInt.load(std::memory_order_relaxed) ? "true" : "false", ppc_state.pc,
       LR(ppc_state));
 
   if (!m_is_fifo_error_seen && !suppress_panic_alert)
@@ -683,9 +686,9 @@ void CommandProcessorManager::HandleUnknownOpcode(u8 cmd_byte, const u8* buffer,
     // The panic alert contains an explanatory part that's worded differently depending on the
     // user's settings, so as to offer the most relevant advice to the user.
     const char* advice;
-    if (IsOnThread(m_system) && !m_system.GetFifo().UseDeterministicGPUThread())
+    if (IsOnThread(system) && !system.GetFifo().UseDeterministicGPUThread())
     {
-      if (!m_system.GetCoreTiming().UseSyncOnSkipIdle() && !m_system.GetFifo().UseSyncGPU())
+      if (!system.GetCoreTiming().UseSyncOnSkipIdle() && !system.GetFifo().UseSyncGPU())
       {
 // The SyncOnSkipIdle setting is only in the Android GUI, so we use the INI name on other platforms.
 //

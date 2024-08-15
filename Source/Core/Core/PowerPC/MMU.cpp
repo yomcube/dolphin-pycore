@@ -741,6 +741,26 @@ u64 MMU::HostRead_U64(const Core::CPUThreadGuard& guard, const u32 address)
   return mmu.ReadFromHardware<XCheckTLBFlag::NoException, u64>(address);
 }
 
+s8 MMU::HostRead_S8(const Core::CPUThreadGuard& guard, const u32 address)
+{
+  return static_cast<s8>(HostRead_U8(guard, address));
+}
+
+s16 MMU::HostRead_S16(const Core::CPUThreadGuard& guard, const u32 address)
+{
+  return static_cast<s16>(HostRead_U16(guard, address));
+}
+
+s32 MMU::HostRead_S32(const Core::CPUThreadGuard& guard, const u32 address)
+{
+  return static_cast<s32>(HostRead_U32(guard, address));
+}
+
+s64 MMU::HostRead_S64(const Core::CPUThreadGuard& guard, const u32 address)
+{
+  return static_cast<s64>(HostRead_U64(guard, address));
+}
+
 float MMU::HostRead_F32(const Core::CPUThreadGuard& guard, const u32 address)
 {
   const u32 integral = HostRead_U32(guard, address);
@@ -753,6 +773,36 @@ double MMU::HostRead_F64(const Core::CPUThreadGuard& guard, const u32 address)
   const u64 integral = HostRead_U64(guard, address);
 
   return std::bit_cast<double>(integral);
+}
+
+template <class T>
+size_t MMU::ReadAndCopyBytes(const Core::CPUThreadGuard& guard, char* buff, u32 address)
+{
+  auto& mmu = guard.GetSystem().GetMMU();
+  T result = mmu.ReadFromHardware<XCheckTLBFlag::NoException, T>(address);
+  Common::swap<sizeof(T)>((u8*)&result);
+  std::memcpy(buff, &result, sizeof(T));
+  return sizeof(T);
+}
+
+char* MMU::HostRead_Bytes(const Core::CPUThreadGuard& guard, u32 address, u32 size)
+{
+  char* buff = new char[size];
+
+  for (size_t bytes_read = 0; bytes_read < size;)
+  {
+    size_t bytes_remaining = size - bytes_read;
+    if (bytes_remaining >= sizeof(u64))
+      bytes_read += ReadAndCopyBytes<u64>(guard, buff + bytes_read, address + (u32)bytes_read);
+    else if (bytes_remaining >= sizeof(u32))
+      bytes_read += ReadAndCopyBytes<u32>(guard, buff + bytes_read, address + (u32)bytes_read);
+    else if (bytes_remaining >= sizeof(u16))
+      bytes_read += ReadAndCopyBytes<u16>(guard, buff + bytes_read, address + (u32)bytes_read);
+    else
+      bytes_read += ReadAndCopyBytes<u8>(guard, buff + bytes_read, address + (u32)bytes_read);
+  }
+
+  return buff;
 }
 
 void MMU::HostWrite_U8(const Core::CPUThreadGuard& guard, const u32 var, const u32 address)
@@ -778,6 +828,59 @@ void MMU::HostWrite_U64(const Core::CPUThreadGuard& guard, const u64 var, const 
   auto& mmu = guard.GetSystem().GetMMU();
   mmu.WriteToHardware<XCheckTLBFlag::NoException>(address, static_cast<u32>(var >> 32), 4);
   mmu.WriteToHardware<XCheckTLBFlag::NoException>(address + sizeof(u32), static_cast<u32>(var), 4);
+}
+
+void MMU::HostWrite_S8(const Core::CPUThreadGuard& guard, const u32 var, const u32 address)
+{
+  HostWrite_U8(guard, static_cast<s32>(var), address);
+}
+
+void MMU::HostWrite_S16(const Core::CPUThreadGuard& guard, const u32 var, const u32 address)
+{
+  HostWrite_U16(guard, static_cast<s32>(var), address);
+}
+
+void MMU::HostWrite_S32(const Core::CPUThreadGuard& guard, const u32 var, const u32 address)
+{
+  HostWrite_U32(guard, static_cast<s32>(var), address);
+}
+
+void MMU::HostWrite_S64(const Core::CPUThreadGuard& guard, const u64 var, const u32 address)
+{
+  HostWrite_U64(guard, static_cast<s64>(var), address);
+}
+
+template <class T>
+void MMU::TWriteBytes(const Core::CPUThreadGuard& guard, char* buff, u32 address)
+{
+  auto& mmu = guard.GetSystem().GetMMU();
+  u32 data;
+  memcpy(&data, buff, sizeof(T));
+  Common::swap<sizeof(T)>((u8*)&data);
+  mmu.WriteToHardware<XCheckTLBFlag::NoException>(address, data, sizeof(T));
+}
+
+void MMU::HostWrite_Bytes(const Core::CPUThreadGuard& guard, u32 address, char* buff, size_t size)
+{
+  for (size_t bytes_written = 0; bytes_written < size;)
+  {
+    size_t bytes_remaining = size - bytes_written;
+    if (bytes_remaining >= sizeof(u32))
+    {
+      TWriteBytes<u32>(guard, buff + bytes_written, address + (u32)bytes_written);
+      bytes_written += sizeof(u32);
+    }
+    else if (bytes_remaining >= sizeof(u16))
+    {
+      TWriteBytes<u16>(guard, buff + bytes_written, address + (u32)bytes_written);
+      bytes_written += sizeof(u16);
+    }
+    else
+    {
+      TWriteBytes<u8>(guard, buff + bytes_written, address + (u32)bytes_written);
+      bytes_written += sizeof(u8);
+    }
+  }
 }
 
 void MMU::HostWrite_F32(const Core::CPUThreadGuard& guard, const float var, const u32 address)

@@ -21,6 +21,9 @@ public:
   void showEvent(QShowEvent* event) override;
 
 private:
+  void CreateTriggersBox();
+  void CreateButtonsBox();
+
   int m_controller_id;
 
   InputOverrider m_overrider;
@@ -37,8 +40,10 @@ private:
   TASCheckBox* m_up_button;
   TASCheckBox* m_down_button;
   TASCheckBox* m_right_button;
-  QGroupBox* m_main_stick_box;
-  QGroupBox* m_c_stick_box;
+  TASSpinBox* m_l_trigger_value;
+  TASSpinBox* m_r_trigger_value;
+  TASStickBox* m_main_stick_box;
+  TASStickBox* m_c_stick_box;
   QGroupBox* m_triggers_box;
   QGroupBox* m_buttons_box;
 };

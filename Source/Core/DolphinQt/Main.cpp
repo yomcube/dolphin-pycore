@@ -40,6 +40,7 @@
 #include "DolphinQt/Translation.h"
 #include "DolphinQt/Updater.h"
 
+#include "Scripting/ScriptingEngine.h"
 #include "UICommon/CommandLineParse.h"
 #include "UICommon/UICommon.h"
 
@@ -218,6 +219,15 @@ int main(int argc, char* argv[])
     boot = BootParameters::GenerateFromFile(
         args.front(), BootSessionData(save_state_path, DeleteSavestateAfterBoot::No));
     game_specified = true;
+  }
+  std::optional<std::string> script_filepath;
+  if (options.is_set("script"))
+  {
+    script_filepath = static_cast<const char*>(options.get("script"));
+  }
+  if (options.get("no_python_subinterpreters"))
+  {
+    Scripting::ScriptingBackend::DisablePythonSubinterpreters();
   }
 
   int retval;

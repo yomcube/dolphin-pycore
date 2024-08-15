@@ -19,7 +19,10 @@
 #include "Common/MathUtil.h"
 #include "Common/MsgHandler.h"
 
+#include "Core/API/Controller.h"
 #include "Core/Config/MainSettings.h"
+#include "Core/Config/SYSCONFSettings.h"
+#include "Core/ConfigManager.h"
 #include "Core/Core.h"
 #include "Core/HW/Wiimote.h"
 #include "Core/Movie.h"
@@ -206,7 +209,11 @@ void Wiimote::Reset()
   m_imu_cursor_state = {};
 }
 
-Wiimote::Wiimote(const unsigned int index) : m_index(index), m_bt_device_index(index)
+WiimoteCommon::ButtonData Wiimote::GetButtonData() const {
+  return m_status.buttons;
+}
+
+Wiimote::Wiimote(const unsigned int index) : m_index(index)
 {
   using Translatability = ControllerEmu::Translatability;
 
@@ -636,7 +643,7 @@ void Wiimote::SendDataReport(const DesiredWiimoteState& target_state)
 
       // The real wiimote reads camera data from the i2c bus starting at offset 0x37:
       const u8 camera_data_offset =
-          CameraLogic::REPORT_DATA_OFFSET + rpt_builder.GetIRDataFormatOffset();
+        CameraLogic::REPORT_DATA_OFFSET + rpt_builder.GetIRDataFormatOffset();
 
       u8* ir_data = rpt_builder.GetIRDataPtr();
       const u8 ir_size = rpt_builder.GetIRDataSize();
@@ -661,8 +668,8 @@ void Wiimote::SendDataReport(const DesiredWiimoteState& target_state)
       {
         // TODO: Make input preparation triggered by bus read.
         m_motion_plus.PrepareInput(target_state.motion_plus.has_value() ?
-                                       target_state.motion_plus.value() :
-                                       MotionPlus::GetDefaultGyroscopeData());
+                                   target_state.motion_plus.value() :
+                                   MotionPlus::GetDefaultGyroscopeData());
       }
 
       u8* ext_data = rpt_builder.GetExtDataPtr();

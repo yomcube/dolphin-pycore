@@ -116,6 +116,7 @@
 #include "DolphinQt/ResourcePackManager.h"
 #include "DolphinQt/Resources.h"
 #include "DolphinQt/RiivolutionBootWidget.h"
+#include "DolphinQt/Scripting/ScriptingWidget.h"
 #include "DolphinQt/SearchBar.h"
 #include "DolphinQt/Settings.h"
 #include "DolphinQt/SkylanderPortal/SkylanderPortalWindow.h"
@@ -127,6 +128,8 @@
 
 #include "InputCommon/ControllerInterface/ControllerInterface.h"
 #include "InputCommon/GCAdapter.h"
+
+#include "Scripting/ScriptList.h"
 
 #include "UICommon/DiscordPresence.h"
 #include "UICommon/GameFile.h"
@@ -218,7 +221,7 @@ static std::vector<std::string> StringListToStdVector(QStringList list)
 }
 
 MainWindow::MainWindow(std::unique_ptr<BootParameters> boot_parameters,
-                       const std::string& movie_path)
+                       const std::string& movie_path, std::optional<std::string> script)
     : QMainWindow(nullptr)
 {
   setWindowTitle(QString::fromStdString(Common::GetScmRevStr()));
@@ -328,6 +331,11 @@ MainWindow::MainWindow(std::unique_ptr<BootParameters> boot_parameters,
   {
     StartGame(std::move(m_pending_boot));
     m_pending_boot.reset();
+  }
+
+  if (script.has_value())
+  {
+    Scripts::g_scripts[script.value()] = nullptr;
   }
 }
 
@@ -471,6 +479,7 @@ void MainWindow::CreateComponents()
   m_code_widget = new CodeWidget(this);
   m_cheats_manager = new CheatsManager(Core::System::GetInstance(), this);
   m_assembler_widget = new AssemblerWidget(this);
+  m_scripting_widget = new ScriptingWidget(this);
 
   const auto request_watch = [this](QString name, u32 addr) {
     m_watch_widget->AddWatch(name, addr);
@@ -697,6 +706,7 @@ void MainWindow::ConnectToolBar()
   connect(m_tool_bar, &ToolBar::SettingsPressed, this, &MainWindow::ShowSettingsWindow);
   connect(m_tool_bar, &ToolBar::ControllersPressed, this, &MainWindow::ShowControllersWindow);
   connect(m_tool_bar, &ToolBar::GraphicsPressed, this, &MainWindow::ShowGraphicsWindow);
+  connect(m_tool_bar, &ToolBar::ScriptingPressed, this, &MainWindow::ShowScriptingWidget);
 
   connect(m_tool_bar, &ToolBar::StepPressed, m_code_widget, &CodeWidget::Step);
   connect(m_tool_bar, &ToolBar::StepOverPressed, m_code_widget, &CodeWidget::StepOver);
@@ -762,6 +772,7 @@ void MainWindow::ConnectStack()
   addDockWidget(Qt::LeftDockWidgetArea, m_network_widget);
   addDockWidget(Qt::LeftDockWidgetArea, m_jit_widget);
   addDockWidget(Qt::LeftDockWidgetArea, m_assembler_widget);
+  addDockWidget(Qt::LeftDockWidgetArea, m_scripting_widget);
 
   tabifyDockWidget(m_log_widget, m_log_config_widget);
   tabifyDockWidget(m_log_widget, m_code_widget);
@@ -773,6 +784,7 @@ void MainWindow::ConnectStack()
   tabifyDockWidget(m_log_widget, m_network_widget);
   tabifyDockWidget(m_log_widget, m_jit_widget);
   tabifyDockWidget(m_log_widget, m_assembler_widget);
+  tabifyDockWidget(m_log_widget, m_scripting_widget);
 }
 
 void MainWindow::RefreshGameList()
@@ -1266,6 +1278,12 @@ void MainWindow::ShowControllersWindow()
   m_controllers_window->show();
   m_controllers_window->raise();
   m_controllers_window->activateWindow();
+}
+
+void MainWindow::ShowScriptingWidget()
+{
+  Settings& settings = Settings::Instance();
+  settings.SetScriptingVisible(!settings.IsScriptingVisible());
 }
 
 void MainWindow::ShowFreeLookWindow()
@@ -1985,6 +2003,7 @@ void MainWindow::ShowTASInput()
       m_gc_tas_input_windows[i]->show();
       m_gc_tas_input_windows[i]->raise();
       m_gc_tas_input_windows[i]->activateWindow();
+      m_gc_tas_input_windows[i]->setFocus();
     }
   }
 
@@ -1998,6 +2017,7 @@ void MainWindow::ShowTASInput()
       m_wii_tas_input_windows[i]->show();
       m_wii_tas_input_windows[i]->raise();
       m_wii_tas_input_windows[i]->activateWindow();
+      m_wii_tas_input_windows[i]->setFocus();
     }
   }
 }

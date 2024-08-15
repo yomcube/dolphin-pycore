@@ -24,6 +24,7 @@ class QSpinBox;
 class QString;
 class TASCheckBox;
 class TASSpinBox;
+class TASStickBox;
 
 class InputOverrider final
 {
@@ -51,9 +52,9 @@ public:
 protected:
   TASCheckBox* CreateButton(const QString& text, std::string_view group_name,
                             std::string_view control_name, InputOverrider* overrider);
-  QGroupBox* CreateStickInputs(const QString& text, std::string_view group_name,
-                               InputOverrider* overrider, int min_x, int min_y, int max_x,
-                               int max_y, Qt::Key x_shortcut_key, Qt::Key y_shortcut_key);
+  TASStickBox* CreateStickInputs(const QString& text, std::string_view group_name,
+                                 InputOverrider* overrider, int min_x, int min_y, int max_x,
+                                 int max_y, Qt::Key x_shortcut_key, Qt::Key y_shortcut_key);
   QBoxLayout* CreateSliderValuePairLayout(const QString& text, std::string_view group_name,
                                           std::string_view control_name, InputOverrider* overrider,
                                           int zero, int default_, int min, int max,
@@ -73,6 +74,7 @@ protected:
 
   QGroupBox* m_settings_box;
   QCheckBox* m_use_controller;
+  QCheckBox* m_toggle_lines;
   QSpinBox* m_turbo_press_frames;
   QSpinBox* m_turbo_release_frames;
 

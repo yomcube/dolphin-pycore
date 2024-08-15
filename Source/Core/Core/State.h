@@ -105,6 +105,8 @@ void Load(Core::System& system, int slot);
 
 void SaveAs(Core::System& system, const std::string& filename, bool wait = false);
 void LoadAs(Core::System& system, const std::string& filename);
+void SaveFile(Core::System& system, const std::string& filename, bool wait = false);
+void LoadFile(Core::System& system, const std::string& filename);
 
 void SaveToBuffer(Core::System& system, std::vector<u8>& buffer);
 void LoadFromBuffer(Core::System& system, std::vector<u8>& buffer);

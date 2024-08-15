@@ -687,9 +687,24 @@ bool Settings::IsAssemblerVisible() const
   return QSettings().value(QStringLiteral("debugger/showassembler")).toBool();
 }
 
+void Settings::SetScriptingVisible(bool enabled)
+{
+  if (IsScriptingVisible() == enabled)
+    return;
+  QSettings().setValue(QStringLiteral("debugger/showscripting"), enabled);
+
+  emit ScriptingVisibilityChanged(enabled);
+}
+
+bool Settings::IsScriptingVisible() const
+{
+  return QSettings().value(QStringLiteral("debugger/showscripting")).toBool();
+}
+
 void Settings::RefreshWidgetVisibility()
 {
   emit DebugModeToggled(IsDebugModeEnabled());
+  emit ScriptingVisibilityChanged(IsScriptingVisible());
   emit LogVisibilityChanged(IsLogVisible());
   emit LogConfigVisibilityChanged(IsLogConfigVisible());
 }

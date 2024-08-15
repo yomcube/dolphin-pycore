@@ -3,7 +3,7 @@ if(POLICY CMP0084)
   cmake_policy(SET CMP0084 NEW)
 endif()
 
-if (MSVC)
+if (NOT QT_DIR AND MSVC)
   if(_M_ARM_64)
     list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/Externals/Qt/Qt6.5.1/ARM64")
   else()
@@ -66,6 +66,8 @@ add_executable(dolphin-emu
   Config/ControllerInterface/DualShockUDPClientAddServerDialog.h
   Config/ControllerInterface/DualShockUDPClientWidget.cpp
   Config/ControllerInterface/DualShockUDPClientWidget.h
+  Config/ControllerInterface/ControllerInterfaceWindow.cpp
+  Config/ControllerInterface/ControllerInterfaceWindow.h
   Config/ControllerInterface/ServerStringValidator.cpp
   Config/ControllerInterface/ServerStringValidator.h
   Config/ControllersWindow.cpp
@@ -76,6 +78,8 @@ add_executable(dolphin-emu
   Config/FreeLookWidget.h
   Config/FreeLookWindow.cpp
   Config/FreeLookWindow.h
+  Config/GamecubeControllersWidget.cpp
+  Config/GamecubeControllersWidget.h
   Config/GameConfigEdit.cpp
   Config/GameConfigEdit.h
   Config/GameConfigHighlighter.cpp
@@ -273,6 +277,8 @@ add_executable(dolphin-emu
   MainWindow.h
   MenuBar.cpp
   MenuBar.h
+  QtUtils/BlockUserInputFilter.cpp
+  QtUtils/BlockUserInputFilter.h
   NetPlay/ChunkedProgressDialog.cpp
   NetPlay/ChunkedProgressDialog.h
   NetPlay/GameDigestDialog.cpp
@@ -326,6 +332,10 @@ add_executable(dolphin-emu
   QtUtils/WrapInScrollArea.h
   RenderWidget.cpp
   RenderWidget.h
+  QtUtils/AspectRatioWidget.cpp
+  QtUtils/AspectRatioWidget.h
+  QtUtils/NonDefaultQPushButton.cpp
+  QtUtils/NonDefaultQPushButton.h
   ResourcePackManager.cpp
   ResourcePackManager.h
   Resources.cpp
@@ -350,6 +360,8 @@ add_executable(dolphin-emu
   Settings/InterfacePane.h
   Settings/PathPane.cpp
   Settings/PathPane.h
+  Settings/WiiPane.cpp
+  Settings/WiiPane.h
   Settings/USBDeviceAddToWhitelistDialog.cpp
   Settings/USBDeviceAddToWhitelistDialog.h
   Settings/WiiPane.cpp
@@ -360,6 +372,8 @@ add_executable(dolphin-emu
   SkylanderPortal/SkylanderPortalWindow.h
   TAS/GCTASInputWindow.cpp
   TAS/GCTASInputWindow.h
+  TAS/WiiTASInputWindow.cpp
+  TAS/WiiTASInputWindow.h
   TAS/GBATASInputWindow.cpp
   TAS/GBATASInputWindow.h
   TAS/IRWidget.cpp
@@ -374,6 +388,8 @@ add_executable(dolphin-emu
   TAS/TASInputWindow.h
   TAS/TASSlider.cpp
   TAS/TASSlider.h
+  TAS/TASStickBox.cpp
+  TAS/TASStickBox.h
   TAS/TASSpinBox.cpp
   TAS/TASSpinBox.h
   TAS/WiiTASInputWindow.cpp
@@ -386,6 +402,10 @@ add_executable(dolphin-emu
   Updater.h
   WiiUpdate.cpp
   WiiUpdate.h
+  Scripting/ScriptingWidget.cpp
+  Scripting/ScriptingWidget.h
+  Scripting/ScriptsListModel.cpp
+  Scripting/ScriptsListModel.h
 )
 
 if (WIN32)
@@ -625,16 +645,14 @@ if(APPLE)
     endif()
   endif()
 
-  if(NOT SKIP_POSTPROCESS_BUNDLE)
-    # Update library references to make the bundle portable
-    include(DolphinPostprocessBundle)
-    dolphin_postprocess_bundle(dolphin-emu)
-    # Fix rpath
-    add_custom_command(TARGET dolphin-emu
-      POST_BUILD COMMAND
-      ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/../Frameworks/"
-      $<TARGET_FILE:dolphin-emu>)
-  endif()
+  # Update library references to make the bundle portable
+  include(DolphinPostprocessBundle)
+  dolphin_postprocess_bundle(dolphin-emu)
+  # Fix rpath
+  add_custom_command(TARGET dolphin-emu
+    POST_BUILD COMMAND
+    ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/../Frameworks/"
+    $<TARGET_FILE:dolphin-emu>)
 
   if(MACOS_CODE_SIGNING)
     add_custom_command(TARGET dolphin-emu

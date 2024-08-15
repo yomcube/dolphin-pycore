@@ -86,7 +86,9 @@
 #include "InputCommon/ControllerInterface/ControllerInterface.h"
 #include "InputCommon/GCAdapter.h"
 
+#include "Scripting/ScriptList.h"
 #include "VideoCommon/Assets/CustomAssetLoader.h"
+
 #include "VideoCommon/AsyncRequests.h"
 #include "VideoCommon/Fifo.h"
 #include "VideoCommon/FrameDumper.h"
@@ -177,6 +179,10 @@ void OnFrameEnd(Core::System& system)
     s_memory_watcher->Step(guard);
   }
 #endif
+}
+
+void OnFrameBegin()
+{
 }
 
 // Display messages and return values
@@ -296,6 +302,9 @@ void Stop(Core::System& system)  // - Hammertime!
   HostDispatchJobs(system);
 
   system.GetFifo().EmulatorState(false);
+
+  // Stop all script execution
+  Scripts::StopAllScripts();
 
   INFO_LOG_FMT(CONSOLE, "Stop [Main Thread]\t\t---- Shutting down ----");
 
@@ -608,7 +617,7 @@ static void EmuThread(Core::System& system, std::unique_ptr<BootParameters> boot
   system.GetPowerPC().SetMode(PowerPC::CoreMode::Interpreter);
 
   // Determine the CPU thread function
-  void (*cpuThreadFunc)(Core::System & system, const std::optional<std::string>& savestate_path,
+  void (*cpuThreadFunc)(Core::System& system, const std::optional<std::string>& savestate_path,
                         bool delete_savestate);
   if (std::holds_alternative<BootParameters::DFF>(boot->parameters))
     cpuThreadFunc = FifoPlayerThread;
@@ -652,6 +661,8 @@ static void EmuThread(Core::System& system, std::unique_ptr<BootParameters> boot
   }
 
   UpdateTitle(system);
+  // Take any pending scripts and instantiate backends
+  Scripts::StartPendingScripts();
 
   // ENTER THE VIDEO THREAD LOOP
   if (system.IsDualCoreMode())
@@ -882,6 +893,7 @@ void Callback_FramePresented(double actual_emulation_speed)
 // Called from VideoInterface::Update (CPU thread) at emulated field boundaries
 void Callback_NewField(Core::System& system)
 {
+  OnFrameBegin();
   if (s_frame_step)
   {
     // To ensure that s_stop_frame_step is up to date, wait for the GPU thread queue to empty,
@@ -1061,9 +1073,11 @@ void UpdateInputGate(bool require_focus, bool require_full_focus)
   const bool focus_passes =
       !require_focus ||
       ((Host_RendererHasFocus() || Host_TASInputHasFocus()) && !Host_UIBlocksControllerState());
+
   // Ignore full focus if we don't require basic focus
   const bool full_focus_passes =
-      !require_focus || !require_full_focus || (focus_passes && Host_RendererHasFullFocus());
+      !require_focus || !require_full_focus ||
+      (focus_passes && (Host_RendererHasFullFocus() || Host_TASInputHasFocus()));
   ControlReference::SetInputGate(focus_passes && full_focus_passes);
 }
 

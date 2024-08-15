@@ -91,6 +91,40 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
+	<!--Link Base:Application-->
+    <Link Condition="'$(ConfigurationType)'=='Application'">
+      <AdditionalDependencies>avrt.lib;iphlpapi.lib;winmm.lib;setupapi.lib;rpcrt4.lib;comctl32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Platform)'=='x64'">opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <!--FFmpeg and the libs it pulls in-->
+      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;Bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ExternalsDir)FFmpeg-bin\$(Platform)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <!-- python -->
+      <AdditionalLibraryDirectories>$(ExternalsDir)python\$(Platform)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <!--See Common/CompatPatches.cpp-->
+      <ForceSymbolReferences>enableCompatPatches</ForceSymbolReferences>
+    </Link>
+    <!--Link Debug:Application-->
+    <Link Condition="'$(Configuration)'=='Debug' And '$(ConfigurationType)'=='Application'">
+      <!--The FFmpeg we link against uses non-debug msvcrt. Ignore it.-->
+      <AdditionalOptions>/NODEFAULTLIB:msvcrt %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <!--Link Base:Application-->
+    <Link Condition="'$(ConfigurationType)'=='Application'">
+      <AdditionalDependencies>avrt.lib;iphlpapi.lib;winmm.lib;setupapi.lib;rpcrt4.lib;comctl32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Platform)'=='x64'">opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <!--FFmpeg and the libs it pulls in-->
+      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;Bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ExternalsDir)FFmpeg-bin\$(Platform)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <!-- python -->
+      <AdditionalLibraryDirectories>$(ExternalsDir)python\$(Platform)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <!--See Common/CompatPatches.cpp-->
+      <ForceSymbolReferences>enableCompatPatches</ForceSymbolReferences>
+    </Link>
+    <!--Link Debug:Application-->
+    <Link Condition="'$(Configuration)'=='Debug' And '$(ConfigurationType)'=='Application'">
+      <!--The FFmpeg we link against uses non-debug msvcrt. Ignore it.-->
+      <AdditionalOptions>/NODEFAULTLIB:msvcrt %(AdditionalOptions)</AdditionalOptions>
+    </Link>
     <Lib>
       <TreatLibWarningAsErrors>true</TreatLibWarningAsErrors>
       <LinkTimeCodeGeneration Condition="'$(DolphinRelease)'=='true'">true</LinkTimeCodeGeneration>

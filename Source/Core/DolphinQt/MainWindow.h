@@ -51,6 +51,7 @@ class SkylanderPortalWindow;
 class ThreadWidget;
 class ToolBar;
 class WatchWidget;
+class ScriptingWidget;
 class WiiTASInputWindow;
 struct WindowSystemInfo;
 
@@ -75,7 +76,8 @@ class MainWindow final : public QMainWindow
 
 public:
   explicit MainWindow(std::unique_ptr<BootParameters> boot_parameters,
-                      const std::string& movie_path);
+                      const std::string& movie_path,
+                      std::optional<std::string> script = std::optional<std::string>());
   ~MainWindow();
 
   WindowSystemInfo GetWindowSystemInfo() const;
@@ -160,6 +162,7 @@ private:
   void ShowAudioWindow();
   void ShowControllersWindow();
   void ShowGraphicsWindow();
+  void ShowScriptingWidget();
   void ShowFreeLookWindow();
   void ShowAboutDialog();
   void ShowHotkeyDialog();
@@ -272,5 +275,6 @@ private:
   ThreadWidget* m_thread_widget;
   WatchWidget* m_watch_widget;
   CheatsManager* m_cheats_manager;
+  ScriptingWidget* m_scripting_widget;
   QByteArray m_render_widget_geometry;
 };

@@ -632,6 +632,8 @@ dolphin_find_optional_system_library_pkgconfig(FMT
 )
 
 add_subdirectory(Externals/imgui)
+add_subdirectory(Externals/nativefiledialog-extended)
+include_directories(Externals/nativefiledialog-extended/src/include)
 add_subdirectory(Externals/implot)
 add_subdirectory(Externals/glslang)
 # SPIRV-Cross is used on Windows for GLSL to HLSL conversion for the Direct3D 11 and Direct3D 12
