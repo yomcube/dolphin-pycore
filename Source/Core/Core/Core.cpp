@@ -397,7 +397,7 @@ static void CpuThread(Core::System& system, const std::optional<std::string>& sa
 
   if (savestate_path)
   {
-    ::State::LoadAs(system, *savestate_path);
+    ::State::LoadFile(system, *savestate_path);
     if (delete_savestate)
       File::Delete(*savestate_path);
   }

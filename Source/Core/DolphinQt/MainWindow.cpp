@@ -1443,7 +1443,7 @@ void MainWindow::StateLoad()
       this, tr("Select a File"), dialog_path, tr("All Save States (*.sav *.s##);; All Files (*)"));
   Config::SetBase(Config::MAIN_CURRENT_STATE_PATH, QFileInfo(path).dir().path().toStdString());
   if (!path.isEmpty())
-    State::LoadAs(Core::System::GetInstance(), path.toStdString());
+    State::LoadFile(Core::System::GetInstance(), path.toStdString());
 }
 
 void MainWindow::StateSave()
@@ -1455,7 +1455,7 @@ void MainWindow::StateSave()
       this, tr("Select a File"), dialog_path, tr("All Save States (*.sav *.s##);; All Files (*)"));
   Config::SetBase(Config::MAIN_CURRENT_STATE_PATH, QFileInfo(path).dir().path().toStdString());
   if (!path.isEmpty())
-    State::SaveAs(Core::System::GetInstance(), path.toStdString());
+    State::SaveFile(Core::System::GetInstance(), path.toStdString());
 }
 
 void MainWindow::StateLoadSlot()

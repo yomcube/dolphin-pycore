@@ -419,6 +419,7 @@ void OnScreenUI::Finalize()
   auto lock = GetImGuiLock();
 
   g_perf_metrics.DrawImGuiStats(m_backbuffer_scale);
+  API::GetGui().Render();
   DrawDebugText();
   OSD::DrawMessages();
   DrawChallengesAndLeaderboards();

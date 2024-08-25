@@ -131,7 +131,7 @@ void RenderWidget::dropEvent(QDropEvent* event)
     return;
   }
 
-  State::LoadAs(Core::System::GetInstance(), path.toStdString());
+  State::LoadFile(Core::System::GetInstance(), path.toStdString());
 }
 
 void RenderWidget::OnHandleChanged(void* handle)

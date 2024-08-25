@@ -25,6 +25,7 @@
 
 #include "Core/AchievementManager.h"
 #include "Core/ActionReplay.h"
+#include "Core/API/Events.h"
 #include "Core/CheatCodes.h"
 #include "Core/Config/SessionSettings.h"
 #include "Core/ConfigManager.h"
@@ -321,6 +322,8 @@ bool ApplyFramePatches(Core::System& system)
   // Run the Gecko code handler
   Gecko::RunCodeHandler(guard);
   ActionReplay::RunAllActive(guard);
+
+  API::GetEventHub().EmitEvent(API::Events::FrameAdvance{});
 
   return true;
 }

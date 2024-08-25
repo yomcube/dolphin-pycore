@@ -4,8 +4,6 @@
 
 #include "Scripting/ScriptList.h"
 
-#include "Core/System.h"
-
 namespace Scripts
 {
 void StartPendingScripts()

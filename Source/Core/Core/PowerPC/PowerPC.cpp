@@ -17,6 +17,7 @@
 #include "Common/Logging/Log.h"
 
 #include "Core/CPUThreadConfigCallback.h"
+#include "Core/API/Events.h"
 #include "Core/Config/MainSettings.h"
 #include "Core/Core.h"
 #include "Core/CoreTiming.h"
@@ -644,7 +645,10 @@ bool PowerPCManager::CheckBreakPoints()
                    m_ppc_state.gpr[12], LR(m_ppc_state));
   }
   if (bp->break_on_hit)
+  {
+    API::GetEventHub().EmitEvent(API::Events::CodeBreakpoint{m_ppc_state.pc});
     return true;
+  }
   return false;
 }
 

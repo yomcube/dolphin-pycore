@@ -52,6 +52,7 @@ private:
   // Options
   ConfigBool* m_show_ping;
   ConfigBool* m_autoadjust_window_size;
+  ConfigBool* m_lock_window_to_right;
   ConfigBool* m_show_messages;
   ConfigBool* m_render_main_window;
   std::array<ConfigRadioInt*, 4> m_shader_compilation_mode{};

@@ -106,6 +106,8 @@ void GeneralWidget::CreateWidgets()
   m_show_ping = new ConfigBool(tr("Show NetPlay Ping"), Config::GFX_SHOW_NETPLAY_PING);
   m_autoadjust_window_size =
       new ConfigBool(tr("Auto-Adjust Window Size"), Config::MAIN_RENDER_WINDOW_AUTOSIZE);
+  m_lock_window_to_right =
+      new ConfigBool(tr("Lock Window to Right"), Config::MAIN_RENDER_WINDOW_LOCK_RIGHT);
   m_show_messages = new ConfigBool(tr("Show NetPlay Messages"), Config::GFX_SHOW_NETPLAY_MESSAGES);
   m_render_main_window = new ConfigBool(tr("Render to Main Window"), Config::MAIN_RENDER_TO_MAIN);
 
@@ -114,7 +116,9 @@ void GeneralWidget::CreateWidgets()
   m_options_layout->addWidget(m_render_main_window, 0, 0);
   m_options_layout->addWidget(m_autoadjust_window_size, 1, 0);
 
+  m_options_layout->addWidget(m_lock_window_to_right, 2, 0);
   m_options_layout->addWidget(m_show_messages, 0, 1);
+
   m_options_layout->addWidget(m_show_ping, 1, 1);
 
   // Other

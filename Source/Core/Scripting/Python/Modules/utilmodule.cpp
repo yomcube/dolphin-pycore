@@ -106,7 +106,7 @@ static PyObject* toggle_play(PyObject* module, PyObject* args)
 {
   // Play/Pause can only be done on the host thread
   Core::QueueHostJob([](Core::System& system) {
-    Core::State current_state = Core::GetState(system);
+    Core::State current_state = GetState(system);
 
     switch (current_state)
     {
@@ -119,7 +119,7 @@ static PyObject* toggle_play(PyObject* module, PyObject* args)
     default:
       break;
     }
-  }, false);
+  });
 
   Py_RETURN_NONE;
 }
