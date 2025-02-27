@@ -1798,6 +1798,14 @@ class SettingsFragmentPresenter(
         sl.add(
             SwitchSetting(
                 context,
+                BooleanSetting.GFX_VSYNC,
+                R.string.vsync,
+                R.string.vsync_description
+            )
+        )
+        sl.add(
+            SwitchSetting(
+                context,
                 BooleanSetting.GFX_BACKEND_MULTITHREADING,
                 R.string.backend_multithreading,
                 R.string.backend_multithreading_description
@@ -2004,6 +2012,16 @@ class SettingsFragmentPresenter(
                 R.string.debug_jit_enable_block_profiling,
                 0
            )
+        )
+        sl.add(
+            RunRunnable(
+                context,
+                R.string.debug_jit_wipe_block_profiling_data,
+                0,
+                R.string.debug_jit_wipe_block_profiling_data_alert,
+                0,
+                true
+            ) { NativeLibrary.WipeJitBlockProfilingData() }
         )
         sl.add(
             RunRunnable(

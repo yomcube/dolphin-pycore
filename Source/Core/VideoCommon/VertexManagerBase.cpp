@@ -970,8 +970,7 @@ void VertexManagerBase::OnDraw()
 
   // Check if this draw is scheduled to kick a command buffer.
   // The draw counters will always be sorted so a binary search is possible here.
-  if (std::binary_search(m_scheduled_command_buffer_kicks.begin(),
-                         m_scheduled_command_buffer_kicks.end(), m_draw_counter))
+  if (std::ranges::binary_search(m_scheduled_command_buffer_kicks, m_draw_counter))
   {
     // Kick a command buffer on the background thread.
     g_gfx->Flush();
@@ -1056,19 +1055,6 @@ void VertexManagerBase::OnEndFrame()
       last_draw_counter = draw_counter;
     }
   }
-
-#if 0
-  {
-    std::ostringstream ss;
-    std::for_each(m_cpu_accesses_this_frame.begin(), m_cpu_accesses_this_frame.end(), [&ss](u32 idx) { ss << idx << ","; });
-    WARN_LOG_FMT(VIDEO, "CPU EFB accesses in last frame: {}", ss.str());
-  }
-  {
-    std::ostringstream ss;
-    std::for_each(m_scheduled_command_buffer_kicks.begin(), m_scheduled_command_buffer_kicks.end(), [&ss](u32 idx) { ss << idx << ","; });
-    WARN_LOG_FMT(VIDEO, "Scheduled command buffer kicks: {}", ss.str());
-  }
-#endif
 
   m_cpu_accesses_this_frame.clear();
 
