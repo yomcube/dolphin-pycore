@@ -409,7 +409,7 @@ const Info<std::string> MAIN_THEME_NAME{{System::Main, "Interface", "ThemeName"}
                                         DEFAULT_THEME_DIR};
 const Info<bool> MAIN_PAUSE_ON_FOCUS_LOST{{System::Main, "Interface", "PauseOnFocusLost"}, false};
 const Info<bool> MAIN_ENABLE_DEBUGGING{{System::Main, "Interface", "DebugModeEnabled"}, false};
-const Info<int> MAIN_IMGUI_FONT_SIZE{{System::Main, "Interface", "ImguiFontSize"}, 14};
+const Info<int> MAIN_IMGUI_FONT_SIZE{{System::Main, "Interface", "ImguiFontSize"}, 13};
 const Info<std::string> MAIN_IMGUI_FONT{{System::Main, "Interface", "ImguiFont"}, "Default"};
 const Info<OutlineRes> MAIN_IMGUI_OUTLINE_RES{{System::Main, "Interface", "ImguiOutline"},
                                               OutlineRes::Off};
