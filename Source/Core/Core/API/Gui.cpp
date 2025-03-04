@@ -35,8 +35,10 @@ void Gui::Render()
 
   ImGui::SetNextWindowPos(ImVec2{0, 0});
   ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-  static auto flags =
-      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration;
+  static auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground |
+                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoFocusOnAppearing |
+                      ImGuiWindowFlags_NoMouseInputs | ImGuiWindowFlags_NoNavInputs |
+                      ImGuiWindowFlags_NoNavFocus;
 
   ImGui::Begin("gui api", nullptr, flags);
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
