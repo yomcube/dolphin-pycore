@@ -67,10 +67,6 @@ public:
 
   using Extension::Extension;
 
-  // TODO: This is public for TAS reasons.
-  // TODO: TAS handles encryption poorly.
-  EncryptionKey ext_key;
-
   static constexpr int CALIBRATION_CHECKSUM_BYTES = 2;
 
 #pragma pack(push, 1)
@@ -101,6 +97,7 @@ public:
   static_assert(0x100 == sizeof(Register));
 
 protected:
+  EncryptionKey ext_key;
   Register m_reg = {};
 
   void Reset() override;

@@ -15,6 +15,11 @@ class QVBoxLayout;
 class ToolTipCheckBox;
 class ToolTipComboBox;
 
+namespace Core
+{
+enum class State;
+}
+
 class InterfacePane final : public QWidget
 {
   Q_OBJECT
@@ -32,6 +37,8 @@ private:
   void OnUserStyleChanged();
   void OnLanguageChanged();
 
+  void OnEmulationStateChanged(Core::State state);
+
   QVBoxLayout* m_main_layout;
   ConfigStringChoice* m_combobox_language;
 
@@ -44,6 +51,7 @@ private:
   ConfigBool* m_checkbox_focused_hotkeys;
   ConfigBool* m_checkbox_use_covers;
   ConfigBool* m_checkbox_disable_screensaver;
+  ConfigBool* m_checkbox_time_tracking;
 
   ConfigBool* m_checkbox_confirm_on_stop;
   ConfigBool* m_checkbox_use_panic_handlers;

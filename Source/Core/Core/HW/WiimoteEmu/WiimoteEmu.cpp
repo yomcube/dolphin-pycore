@@ -17,7 +17,6 @@
 #include "Common/FileUtil.h"
 #include "Common/Logging/Log.h"
 #include "Common/MathUtil.h"
-#include "Common/MsgHandler.h"
 
 #include "Core/API/Controller.h"
 #include "Core/Config/MainSettings.h"
@@ -25,8 +24,6 @@
 #include "Core/ConfigManager.h"
 #include "Core/Core.h"
 #include "Core/HW/Wiimote.h"
-#include "Core/Movie.h"
-#include "Core/System.h"
 
 #include "Core/HW/WiimoteCommon/WiimoteConstants.h"
 #include "Core/HW/WiimoteCommon/WiimoteHid.h"
@@ -42,8 +39,6 @@
 #include "Core/HW/WiimoteEmu/Extension/Turntable.h"
 #include "Core/HW/WiimoteEmu/Extension/UDrawTablet.h"
 
-#include "InputCommon/ControllerEmu/Control/Input.h"
-#include "InputCommon/ControllerEmu/Control/Output.h"
 #include "InputCommon/ControllerEmu/ControlGroup/Attachments.h"
 #include "InputCommon/ControllerEmu/ControlGroup/Buttons.h"
 #include "InputCommon/ControllerEmu/ControlGroup/ControlGroup.h"
@@ -748,10 +743,11 @@ void Wiimote::LoadDefaults(const ControllerInterface& ciface)
   // B
   m_buttons->SetControlExpression(1, "`Click 1`");
 #endif
-  m_buttons->SetControlExpression(2, "`1`");     // 1
-  m_buttons->SetControlExpression(3, "`2`");     // 2
-  m_buttons->SetControlExpression(4, "Q");       // -
-  m_buttons->SetControlExpression(5, "E");       // +
+  // 1 2 - +
+  m_buttons->SetControlExpression(2, "`1`");
+  m_buttons->SetControlExpression(3, "`2`");
+  m_buttons->SetControlExpression(4, "Q");
+  m_buttons->SetControlExpression(5, "E");
 
 #ifdef _WIN32
   m_buttons->SetControlExpression(6, "RETURN");  // Home
@@ -827,14 +823,6 @@ Extension* Wiimote::GetNoneExtension() const
 Extension* Wiimote::GetActiveExtension() const
 {
   return static_cast<Extension*>(m_attachments->GetAttachmentList()[m_active_extension].get());
-}
-
-EncryptionKey Wiimote::GetExtensionEncryptionKey() const
-{
-  if (ExtensionNumber::NONE == GetActiveExtensionNumber())
-    return {};
-
-  return static_cast<EncryptedExtension*>(GetActiveExtension())->ext_key;
 }
 
 bool Wiimote::IsSideways() const
