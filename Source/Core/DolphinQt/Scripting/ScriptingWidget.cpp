@@ -36,7 +36,7 @@
 
 static QSize ICON_SIZE(16, 16);
 
-ScriptingWidget::ScriptingWidget(QWidget* parent)
+ScriptingWidget::ScriptingWidget(QWidget* parent) : QDockWidget(parent)
 {
   setWindowTitle(tr("Scripts"));
 
@@ -45,6 +45,7 @@ ScriptingWidget::ScriptingWidget(QWidget* parent)
   m_button_reload_selected = new QPushButton();
   m_button_open_folder = new QPushButton();
   UpdateIcons();
+  LoadSettings();
 
   QHBoxLayout* actions_layout = new QHBoxLayout;
   actions_layout->addWidget(m_button_add_new);
@@ -53,10 +54,10 @@ ScriptingWidget::ScriptingWidget(QWidget* parent)
   QWidget* actions_widget = new QWidget;
   actions_widget->setLayout(actions_layout);
 
+
   m_scripts_model = new ScriptsFileSystemModel();
   QModelIndex rootIdx =
       m_scripts_model->setRootPath(QString::fromStdString(File::GetUserPath(D_SCRIPTS_IDX)));
-
   m_tree = new QTreeView();
   m_tree->setModel(m_scripts_model);
   m_tree->setRootIndex(rootIdx);
@@ -92,6 +93,11 @@ ScriptingWidget::ScriptingWidget(QWidget* parent)
 
   connect(m_scripts_model, &ScriptsFileSystemModel::dataChanged, this,
           &ScriptingWidget::OnDataChanged);
+}
+
+ScriptingWidget::~ScriptingWidget()
+{
+  SaveSettings();
 }
 
 void ScriptingWidget::UpdateIcons()
@@ -208,4 +214,20 @@ void ScriptingWidget::OnDataChanged(const QModelIndex& topLeft, const QModelInde
     return;
 
   m_tree->setCurrentIndex(topLeft);
+}
+
+void ScriptingWidget::LoadSettings()
+{
+  auto& settings = Settings::GetQSettings();
+
+  restoreGeometry(settings.value(QStringLiteral("scriptingwidget/geometry")).toByteArray());
+  setFloating(settings.value(QStringLiteral("scriptingwidget/floating")).toBool());
+}
+
+void ScriptingWidget::SaveSettings()
+{
+  auto& settings = Settings::GetQSettings();
+
+  settings.setValue(QStringLiteral("scriptingwidget/geometry"), saveGeometry());
+  settings.setValue(QStringLiteral("scriptingwidget/floating"), isFloating());
 }

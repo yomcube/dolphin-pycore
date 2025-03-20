@@ -11,12 +11,16 @@
 #include <QTableView>
 #include <QTreeView>
 
+#include <mutex>
+#include <string>
+
 #include "DolphinQt/Scripting/ScriptsListModel.h"
 
 class ScriptingWidget : public QDockWidget
 {
 public:
   ScriptingWidget(QWidget* parent = nullptr);
+  ~ScriptingWidget();
   void UpdateIcons();
   void AddNewScript();
   void RestartSelectedScripts();
@@ -31,6 +35,8 @@ private:
                      const QList<int>& roles);
   
   void OpenScriptsFolder();
+  void LoadSettings();
+  void SaveSettings();
 
   QPushButton* m_button_add_new;
   QPushButton* m_button_reload_selected;
