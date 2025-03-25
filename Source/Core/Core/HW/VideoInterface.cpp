@@ -15,6 +15,7 @@
 
 #include "VideoCommon/PerformanceMetrics.h"
 
+#include "Core/API/Events.h"
 #include "Core/Config/GraphicsSettings.h"
 #include "Core/Config/MainSettings.h"
 #include "Core/Config/SYSCONFSettings.h"
@@ -850,7 +851,7 @@ void VideoInterfaceManager::Update(u64 ticks)
 {
   // Movie's frame counter should be updated before actually rendering the frame,
   // in case frame counter display is enabled
-
+  //API::GetEventHub().EmitEvent(API::Events::FrameAdvance{});
   if (m_half_line_count == 0 || m_half_line_count == GetHalfLinesPerEvenField())
     m_system.GetMovie().FrameUpdate();
 

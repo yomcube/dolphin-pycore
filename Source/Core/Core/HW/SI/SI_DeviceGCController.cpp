@@ -10,7 +10,9 @@
 #include "Common/Logging/Log.h"
 #include "Common/MsgHandler.h"
 #include "Common/Swap.h"
+#include "Core/API/Gui.h"
 #include "Core/API/Controller.h"
+#include "Core/API/Events.h"
 #include "Core/Config/MainSettings.h"
 #include "Core/CoreTiming.h"
 #include "Core/HW/GCPad.h"
@@ -125,6 +127,8 @@ void CSIDevice_GCController::HandleMoviePadStatus(Movie::MovieManager& movie, in
                                                   GCPadStatus* pad_status)
 {
   movie.CallGCInputManip(pad_status, device_number);
+  //API::GetEventHub().EmitEvent(API::Events::FrameAdvance{});
+  //API::GetGui().Render();
   API::GetGCManip().PerformInputManip(pad_status, device_number);
   
   movie.SetPolledDevice();

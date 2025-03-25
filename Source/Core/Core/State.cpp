@@ -223,9 +223,11 @@ void LoadFromBuffer(Core::System& system, std::vector<u8>& buffer)
   Core::RunOnCPUThread(
       system,
       [&] {
+        API::GetEventHub().EmitEvent(API::Events::BeforeSaveStateLoad{false, -1});
         u8* ptr = buffer.data();
         PointerWrap p(&ptr, buffer.size(), PointerWrap::Mode::Read);
         DoState(system, p);
+        API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{false, -1});
       },
       true);
 }
@@ -235,6 +237,7 @@ void SaveToBuffer(Core::System& system, std::vector<u8>& buffer)
   Core::RunOnCPUThread(
       system,
       [&] {
+        API::GetEventHub().EmitEvent(API::Events::SaveStateSave{false, -1});
         u8* ptr = nullptr;
         PointerWrap p_measure(&ptr, 0, PointerWrap::Mode::Measure);
 
@@ -470,7 +473,8 @@ static void CompressAndDumpState(Core::System& system, CompressAndDumpState_args
   Host_UpdateMainFrame();
 }
 
-void SaveAs(Core::System& system, const std::string& filename, bool wait)
+void SaveAs(Core::System& system, const std::string& filename, bool wait,
+            bool is_slot, int slot)
 {
   std::unique_lock lk(s_load_or_save_in_progress_mutex, std::try_to_lock);
   if (!lk)
@@ -485,6 +489,7 @@ void SaveAs(Core::System& system, const std::string& filename, bool wait)
         }
 
         // Measure the size of the buffer.
+        API::GetEventHub().EmitEvent(API::Events::SaveStateSave{is_slot, slot});
         u8* ptr = nullptr;
         PointerWrap p_measure(&ptr, 0, PointerWrap::Mode::Measure);
         DoState(system, p_measure);
@@ -858,17 +863,17 @@ static void LoadFileStateData(const std::string& filename, std::vector<u8>& ret_
 // To catch both scenarios, we want to first pass file loads/saves through a separate function.
 void LoadFile(Core::System& system, const std::string& filename)
 {
-  LoadAs(system, filename);
-  API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{false, -1});
+  LoadAs(system, filename, false, -1);
+  //API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{false, -1});
 }
 
 void SaveFile(Core::System& system, const std::string& filename, bool wait)
 {
-  SaveAs(system, filename, wait);
-  API::GetEventHub().EmitEvent(API::Events::SaveStateSave{false, -1});
+  SaveAs(system, filename, wait, false, -1);
+  //API::GetEventHub().EmitEvent(API::Events::SaveStateSave{false, -1});
 }
 
-void LoadAs(Core::System& system, const std::string& filename)
+void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int slot)
 {
   if (!Core::IsRunningOrStarting(system))
     return;
@@ -888,10 +893,11 @@ void LoadAs(Core::System& system, const std::string& filename)
   std::unique_lock lk(s_load_or_save_in_progress_mutex, std::try_to_lock);
   if (!lk)
     return;
-
   Core::RunOnCPUThread(
       system,
       [&] {
+        //Sync StateLoad before Load
+        API::GetEventHub().EmitEvent(API::Events::BeforeSaveStateLoad{is_slot, slot});
         // Save temp buffer for undo load state
         auto& movie = system.GetMovie();
         if (!movie.IsJustStartingRecordingInputFromSaveState())
@@ -927,6 +933,8 @@ void LoadAs(Core::System& system, const std::string& filename)
         {
           if (loadedSuccessfully)
           {
+            //Sync StateLoad After Load
+            API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{is_slot, slot});
             std::filesystem::path tempfilename(filename);
             Core::DisplayMessage(
                 fmt::format("Loaded State from {}", tempfilename.filename().string()), 2000);
@@ -993,14 +1001,14 @@ static std::string MakeStateFilename(int number)
 
 void Save(Core::System& system, int slot, bool wait)
 {
-  SaveAs(system, MakeStateFilename(slot), wait);
-  API::GetEventHub().EmitEvent(API::Events::SaveStateSave{true, slot});
+  SaveAs(system, MakeStateFilename(slot), wait, true, slot);
+  //API::GetEventHub().EmitEvent(API::Events::SaveStateSave{true, slot});
 }
 
 void Load(Core::System& system, int slot)
 {
-  LoadAs(system, MakeStateFilename(slot));
-  API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{true, slot});
+  LoadAs(system, MakeStateFilename(slot), true, slot);
+  //API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{true, slot});
 }
 
 void LoadLastSaved(Core::System& system, int i)
@@ -1072,7 +1080,7 @@ void UndoLoadState(Core::System& system)
 // Load the state that the last save state overwritten on
 void UndoSaveState(Core::System& system)
 {
-  LoadAs(system, File::GetUserPath(D_STATESAVES_IDX) + "lastState.sav");
+  LoadAs(system, File::GetUserPath(D_STATESAVES_IDX) + "lastState.sav", false, -1);
 }
 
 }  // namespace State

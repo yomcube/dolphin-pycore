@@ -103,8 +103,8 @@ u64 GetUnixTimeOfSlot(int slot);
 void Save(Core::System& system, int slot, bool wait = false);
 void Load(Core::System& system, int slot);
 
-void SaveAs(Core::System& system, const std::string& filename, bool wait = false);
-void LoadAs(Core::System& system, const std::string& filename);
+void SaveAs(Core::System& system, const std::string& filename, bool wait = false, bool is_slot = false, int slot = -1);
+void LoadAs(Core::System& system, const std::string& filename, bool is_slot = false, int slot = -1);
 void SaveFile(Core::System& system, const std::string& filename, bool wait = false);
 void LoadFile(Core::System& system, const std::string& filename);
 

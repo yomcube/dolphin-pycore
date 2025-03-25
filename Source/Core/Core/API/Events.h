@@ -53,6 +53,14 @@ struct SaveStateLoad
   bool fromSlot;
   int slot;
 };
+struct BeforeSaveStateLoad
+{
+  bool fromSlot;
+  int slot;
+};
+struct FrameBegin
+{
+};
 
 }  // namespace API::Events
 
@@ -197,7 +205,9 @@ using EventHub = GenericEventHub<
   Events::SetInterrupt,
   Events::ClearInterrupt,
   Events::SaveStateSave,
-  Events::SaveStateLoad
+  Events::SaveStateLoad,
+  Events::BeforeSaveStateLoad,
+  Events::FrameBegin
 >;
 
 // global event hub
