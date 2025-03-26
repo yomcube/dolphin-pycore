@@ -61,6 +61,9 @@ struct BeforeSaveStateLoad
 struct FrameBegin
 {
 };
+struct Unpause
+{
+};
 
 }  // namespace API::Events
 
@@ -207,7 +210,8 @@ using EventHub = GenericEventHub<
   Events::SaveStateSave,
   Events::SaveStateLoad,
   Events::BeforeSaveStateLoad,
-  Events::FrameBegin
+  Events::FrameBegin,
+  Events::Unpause
 >;
 
 // global event hub

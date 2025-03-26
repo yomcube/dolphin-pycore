@@ -4,9 +4,11 @@
 #include "VideoCommon/Present.h"
 
 #include "Common/ChunkFile.h"
+#include "Core/API/Events.h"
 #include "Core/Config/MainSettings.h"
 #include "Core/Config/GraphicsSettings.h"
 #include "Core/HW/VideoInterface.h"
+#include "Core/Core.h"
 #include "Core/Host.h"
 #include "Core/System.h"
 

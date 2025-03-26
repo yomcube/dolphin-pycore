@@ -851,7 +851,7 @@ void VideoInterfaceManager::Update(u64 ticks)
 {
   // Movie's frame counter should be updated before actually rendering the frame,
   // in case frame counter display is enabled
-  //API::GetEventHub().EmitEvent(API::Events::FrameAdvance{});
+
   if (m_half_line_count == 0 || m_half_line_count == GetHalfLinesPerEvenField())
     m_system.GetMovie().FrameUpdate();
 
@@ -886,6 +886,7 @@ void VideoInterfaceManager::Update(u64 ticks)
 
   if (m_half_line_of_next_si_poll == m_half_line_count)
   {
+    //API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{false, int(m_half_line_of_next_si_poll)});
     Core::UpdateInputGate(!Config::Get(Config::MAIN_INPUT_BACKGROUND_INPUT),
                           Config::Get(Config::MAIN_LOCK_CURSOR));
     auto& si = m_system.GetSerialInterface();

@@ -184,7 +184,7 @@ void OnFrameEnd(Core::System& system)
 
 void OnFrameBegin()
 {
-  //API::GetEventHub().EmitEvent(API::Events::FrameAdvance{});
+  //API::GetEventHub().EmitEvent(API::Events::FrameBegin{});
 }
 
 // Display messages and return values
@@ -735,6 +735,7 @@ void SetState(Core::System& system, State state, bool report_state_change,
     break;
   case State::Running:
   {
+    API::GetEventHub().EmitEvent(API::Events::Unpause{});
     system.GetCPU().SetStepping(false);
     Wiimote::Resume();
     break;
@@ -894,6 +895,9 @@ void Callback_FramePresented(double actual_emulation_speed)
 
   s_last_actual_emulation_speed = actual_emulation_speed;
   s_stop_frame_step.store(true);
+  //Event here does the same as in presenter:present()
+  //It works for read, but doesnt work for write sometimes
+  //API::GetEventHub().EmitEvent(API::Events::FrameBegin{});
 }
 
 // Called from VideoInterface::Update (CPU thread) at emulated field boundaries

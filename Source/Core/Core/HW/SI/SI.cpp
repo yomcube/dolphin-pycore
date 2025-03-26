@@ -16,6 +16,8 @@
 #include "Common/CommonTypes.h"
 #include "Common/Logging/Log.h"
 #include "Common/Swap.h"
+
+#include "Core/API/Events.h"
 #include "Core/Config/MainSettings.h"
 #include "Core/ConfigManager.h"
 #include "Core/CoreTiming.h"
@@ -143,6 +145,9 @@ void SerialInterfaceManager::GlobalRunSIBuffer(Core::System& system, u64 user_da
 
 void SerialInterfaceManager::RunSIBuffer(u64 user_data, s64 cycles_late)
 {
+  //Doesnt work for inputs for some obscure reasons
+  // Gives the correct frametime however and no panic
+  //API::GetEventHub().EmitEvent(API::Events::FrameBegin{});
   if (m_com_csr.TSTART)
   {
     const s32 request_length = ConvertSILengthField(m_com_csr.OUTLNGTH);
@@ -534,6 +539,7 @@ void SerialInterfaceManager::ChangeDeviceDeterministic(SIDevices device, int cha
 
 void SerialInterfaceManager::UpdateDevices()
 {
+  //API::GetEventHub().EmitEvent(API::Events::FrameBegin{});
   // Check for device change requests:
   for (int i = 0; i != MAX_SI_CHANNELS; ++i)
   {
