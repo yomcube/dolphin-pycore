@@ -1441,7 +1441,7 @@ void MainWindow::StateLoad()
       this, tr("Select a File"), dialog_path, tr("All Save States (*.sav *.s##);; All Files (*)"));
   Config::SetBase(Config::MAIN_CURRENT_STATE_PATH, QFileInfo(path).dir().path().toStdString());
   if (!path.isEmpty())
-    State::LoadFile(m_system, path.toStdString());
+    State::LoadFile(m_system, path.toStdString(), true);
 }
 
 void MainWindow::StateSave()
@@ -1453,22 +1453,22 @@ void MainWindow::StateSave()
       this, tr("Select a File"), dialog_path, tr("All Save States (*.sav *.s##);; All Files (*)"));
   Config::SetBase(Config::MAIN_CURRENT_STATE_PATH, QFileInfo(path).dir().path().toStdString());
   if (!path.isEmpty())
-    State::SaveFile(m_system, path.toStdString(), true);
+    State::SaveFile(m_system, path.toStdString(), true, true);
 }
 
 void MainWindow::StateLoadSlot()
 {
-  State::Load(m_system, m_state_slot);
+  State::Load(m_system, m_state_slot, true);
 }
 
 void MainWindow::StateSaveSlot()
 {
-  State::Save(m_system, m_state_slot);
+  State::Save(m_system, m_state_slot, true, true);
 }
 
 void MainWindow::StateLoadSlotAt(int slot)
 {
-  State::Load(m_system, slot);
+  State::Load(m_system, slot, true);
 }
 
 void MainWindow::StateLoadLastSavedAt(int slot)
@@ -1478,7 +1478,7 @@ void MainWindow::StateLoadLastSavedAt(int slot)
 
 void MainWindow::StateSaveSlotAt(int slot)
 {
-  State::Save(m_system, slot);
+  State::Save(m_system, slot, true, true);
 }
 
 void MainWindow::StateLoadUndo()

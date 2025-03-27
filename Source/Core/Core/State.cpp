@@ -206,7 +206,7 @@ static void DoState(Core::System& system, PointerWrap& p)
 #endif  // USE_RETRO_ACHIEVEMENTS
 }
 
-void LoadFromBuffer(Core::System& system, std::vector<u8>& buffer)
+void LoadFromBuffer(Core::System& system, std::vector<u8>& buffer, bool emit_event)
 {
   if (NetPlay::IsNetPlayRunning())
   {
@@ -223,21 +223,24 @@ void LoadFromBuffer(Core::System& system, std::vector<u8>& buffer)
   Core::RunOnCPUThread(
       system,
       [&] {
-        API::GetEventHub().EmitEvent(API::Events::BeforeSaveStateLoad{false, -1});
+        if (emit_event)
+          API::GetEventHub().EmitEvent(API::Events::BeforeSaveStateLoad{false, -1});
         u8* ptr = buffer.data();
         PointerWrap p(&ptr, buffer.size(), PointerWrap::Mode::Read);
         DoState(system, p);
-        API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{false, -1});
+        if (emit_event)
+          API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{false, -1});
       },
       true);
 }
 
-void SaveToBuffer(Core::System& system, std::vector<u8>& buffer)
+void SaveToBuffer(Core::System& system, std::vector<u8>& buffer, bool emit_event)
 {
   Core::RunOnCPUThread(
       system,
       [&] {
-        API::GetEventHub().EmitEvent(API::Events::SaveStateSave{false, -1});
+        if (emit_event)
+          API::GetEventHub().EmitEvent(API::Events::SaveStateSave{false, -1});
         u8* ptr = nullptr;
         PointerWrap p_measure(&ptr, 0, PointerWrap::Mode::Measure);
 
@@ -474,7 +477,7 @@ static void CompressAndDumpState(Core::System& system, CompressAndDumpState_args
 }
 
 void SaveAs(Core::System& system, const std::string& filename, bool wait,
-            bool is_slot, int slot)
+            bool is_slot, int slot, bool emit_event)
 {
   std::unique_lock lk(s_load_or_save_in_progress_mutex, std::try_to_lock);
   if (!lk)
@@ -489,7 +492,8 @@ void SaveAs(Core::System& system, const std::string& filename, bool wait,
         }
 
         // Measure the size of the buffer.
-        API::GetEventHub().EmitEvent(API::Events::SaveStateSave{is_slot, slot});
+        if (emit_event)
+          API::GetEventHub().EmitEvent(API::Events::SaveStateSave{is_slot, slot});
         u8* ptr = nullptr;
         PointerWrap p_measure(&ptr, 0, PointerWrap::Mode::Measure);
         DoState(system, p_measure);
@@ -861,19 +865,17 @@ static void LoadFileStateData(const std::string& filename, std::vector<u8>& ret_
 // Slot loads/saves first pass through Load()/Save() and then LoadAs()/SaveAs(),
 // whereas file loads/saves ONLY pass through LoadAs()/SaveAs().
 // To catch both scenarios, we want to first pass file loads/saves through a separate function.
-void LoadFile(Core::System& system, const std::string& filename)
+void LoadFile(Core::System& system, const std::string& filename, bool emit_event)
 {
-  LoadAs(system, filename, false, -1);
-  //API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{false, -1});
+  LoadAs(system, filename, false, -1, emit_event);
 }
 
-void SaveFile(Core::System& system, const std::string& filename, bool wait)
+void SaveFile(Core::System& system, const std::string& filename, bool wait, bool emit_event)
 {
-  SaveAs(system, filename, wait, false, -1);
-  //API::GetEventHub().EmitEvent(API::Events::SaveStateSave{false, -1});
+  SaveAs(system, filename, wait, false, -1, emit_event);
 }
 
-void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int slot)
+void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int slot, bool emit_event)
 {
   if (!Core::IsRunningOrStarting(system))
     return;
@@ -897,13 +899,14 @@ void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int
       system,
       [&] {
         //Sync StateLoad before Load
-        API::GetEventHub().EmitEvent(API::Events::BeforeSaveStateLoad{is_slot, slot});
+        if (emit_event)
+          API::GetEventHub().EmitEvent(API::Events::BeforeSaveStateLoad{is_slot, slot});
         // Save temp buffer for undo load state
         auto& movie = system.GetMovie();
         if (!movie.IsJustStartingRecordingInputFromSaveState())
         {
           std::lock_guard lk2(s_undo_load_buffer_mutex);
-          SaveToBuffer(system, s_undo_load_buffer);
+          SaveToBuffer(system, s_undo_load_buffer, emit_event);
           const std::string dtmpath = File::GetUserPath(D_STATESAVES_IDX) + "undo.dtm";
           if (movie.IsMovieActive())
             movie.SaveRecording(dtmpath);
@@ -934,7 +937,8 @@ void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int
           if (loadedSuccessfully)
           {
             //Sync StateLoad After Load
-            API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{is_slot, slot});
+            if (emit_event)
+              API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{is_slot, slot});
             std::filesystem::path tempfilename(filename);
             Core::DisplayMessage(
                 fmt::format("Loaded State from {}", tempfilename.filename().string()), 2000);
@@ -999,16 +1003,14 @@ static std::string MakeStateFilename(int number)
                      SConfig::GetInstance().GetGameID(), number);
 }
 
-void Save(Core::System& system, int slot, bool wait)
+void Save(Core::System& system, int slot, bool wait, bool emit_event)
 {
-  SaveAs(system, MakeStateFilename(slot), wait, true, slot);
-  //API::GetEventHub().EmitEvent(API::Events::SaveStateSave{true, slot});
+  SaveAs(system, MakeStateFilename(slot), wait, true, slot, emit_event);
 }
 
-void Load(Core::System& system, int slot)
+void Load(Core::System& system, int slot, bool emit_event)
 {
-  LoadAs(system, MakeStateFilename(slot), true, slot);
-  //API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{true, slot});
+  LoadAs(system, MakeStateFilename(slot), true, slot, emit_event);
 }
 
 void LoadLastSaved(Core::System& system, int i)
@@ -1027,7 +1029,7 @@ void LoadLastSaved(Core::System& system, int i)
   }
 
   std::stable_sort(used_slots.begin(), used_slots.end(), CompareTimestamp);
-  Load(system, (used_slots.end() - i)->slot);
+  Load(system, (used_slots.end() - i)->slot, true);
 }
 
 // must wait for state to be written because it must know if all slots are taken
@@ -1037,13 +1039,13 @@ void SaveFirstSaved(Core::System& system)
   if (used_slots.size() < NUM_STATES)
   {
     // save to an empty slot
-    Save(system, GetEmptySlot(used_slots), true);
+    Save(system, GetEmptySlot(used_slots), true, true);
     return;
   }
 
   // overwrite the oldest state
   std::stable_sort(used_slots.begin(), used_slots.end(), CompareTimestamp);
-  Save(system, used_slots.front().slot, true);
+  Save(system, used_slots.front().slot, true, true);
 }
 
 // Load the last state before loading the state
@@ -1058,7 +1060,7 @@ void UndoLoadState(Core::System& system)
       const std::string dtmpath = File::GetUserPath(D_STATESAVES_IDX) + "undo.dtm";
       if (File::Exists(dtmpath))
       {
-        LoadFromBuffer(system, s_undo_load_buffer);
+        LoadFromBuffer(system, s_undo_load_buffer, true);
         movie.LoadInput(dtmpath);
       }
       else
@@ -1068,7 +1070,7 @@ void UndoLoadState(Core::System& system)
     }
     else
     {
-      LoadFromBuffer(system, s_undo_load_buffer);
+      LoadFromBuffer(system, s_undo_load_buffer, true);
     }
   }
   else
@@ -1080,7 +1082,7 @@ void UndoLoadState(Core::System& system)
 // Load the state that the last save state overwritten on
 void UndoSaveState(Core::System& system)
 {
-  LoadAs(system, File::GetUserPath(D_STATESAVES_IDX) + "lastState.sav", false, -1);
+  LoadAs(system, File::GetUserPath(D_STATESAVES_IDX) + "lastState.sav", false, -1, true);
 }
 
 }  // namespace State

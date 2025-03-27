@@ -404,7 +404,7 @@ static void CpuThread(Core::System& system, const std::optional<std::string>& sa
 
   if (savestate_path)
   {
-    ::State::LoadFile(system, *savestate_path);
+    ::State::LoadFile(system, *savestate_path, true);
     if (delete_savestate)
       File::Delete(*savestate_path);
   }
@@ -1083,7 +1083,6 @@ void UpdateInputGate(bool require_focus, bool require_full_focus)
   const bool focus_passes =
       !require_focus ||
       ((Host_RendererHasFocus() || Host_TASInputHasFocus()) && !Host_UIBlocksControllerState());
-
   // Ignore full focus if we don't require basic focus
   const bool full_focus_passes =
       !require_focus || !require_full_focus ||

@@ -100,16 +100,16 @@ u64 GetUnixTimeOfSlot(int slot);
 //    If we're in the main CPU thread then they run immediately instead
 //    because some things (like Lua) need them to run immediately.
 // Slots from 0-99.
-void Save(Core::System& system, int slot, bool wait = false);
-void Load(Core::System& system, int slot);
+void Save(Core::System& system, int slot, bool wait, bool emit_event);
+void Load(Core::System& system, int slot, bool emit_event);
 
-void SaveAs(Core::System& system, const std::string& filename, bool wait = false, bool is_slot = false, int slot = -1);
-void LoadAs(Core::System& system, const std::string& filename, bool is_slot = false, int slot = -1);
-void SaveFile(Core::System& system, const std::string& filename, bool wait = false);
-void LoadFile(Core::System& system, const std::string& filename);
+void SaveAs(Core::System& system, const std::string& filename, bool wait, bool is_slot, int slot, bool emit_event);
+void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int slot, bool emit_event);
+void SaveFile(Core::System& system, const std::string& filename, bool wait, bool emit_event);
+void LoadFile(Core::System& system, const std::string& filename, bool emit_event);
 
-void SaveToBuffer(Core::System& system, std::vector<u8>& buffer);
-void LoadFromBuffer(Core::System& system, std::vector<u8>& buffer);
+void SaveToBuffer(Core::System& system, std::vector<u8>& buffer, bool emit_event);
+void LoadFromBuffer(Core::System& system, std::vector<u8>& buffer, bool emit_event);
 
 void LoadLastSaved(Core::System& system, int i = 1);
 void SaveFirstSaved(Core::System& system);
