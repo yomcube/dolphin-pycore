@@ -28,6 +28,7 @@
 #include "Core/HW/SI/SI.h"
 #include "Core/HW/SystemTimers.h"
 #include "Core/Movie.h"
+#include "Core/PowerPC/PowerPC.h"
 #include "Core/System.h"
 
 #include "DiscIO/Enums.h"
@@ -883,10 +884,32 @@ void VideoInterfaceManager::Update(u64 ticks)
     Core::Callback_NewField(m_system);
 
   // If an SI poll is scheduled to happen on this half-line, do it!
-
+  if (m_frame_begin_event_retry_counter == 0)
+  {
+    const auto& ppc_state = m_system.GetPPCState();
+    ASSERT(Core::IsCPUThread());
+    Core::CPUThreadGuard guard(m_system);
+    if (!ppc_state.msr.DR || !ppc_state.msr.IR)
+      m_frame_begin_event_retry_counter = 10;
+    else
+    {
+      API::GetEventHub().EmitEvent(API::Events::FrameBegin{});
+      m_frame_begin_event_retry_counter = 2000;
+    }
+      
+  }
   if (m_half_line_of_next_si_poll == m_half_line_count)
   {
-    //API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{false, int(m_half_line_of_next_si_poll)});
+    const auto& ppc_state = m_system.GetPPCState();
+    ASSERT(Core::IsCPUThread());
+    Core::CPUThreadGuard guard(m_system);
+    if (!ppc_state.msr.DR || !ppc_state.msr.IR)
+      m_frame_begin_event_retry_counter = 10;
+    else
+    {
+      API::GetEventHub().EmitEvent(API::Events::FrameBegin{});
+      m_frame_begin_event_retry_counter = 2000;
+    }
     Core::UpdateInputGate(!Config::Get(Config::MAIN_INPUT_BACKGROUND_INPUT),
                           Config::Get(Config::MAIN_LOCK_CURSOR));
     auto& si = m_system.GetSerialInterface();
@@ -910,6 +933,7 @@ void VideoInterfaceManager::Update(u64 ticks)
   // the beginning of a new full-line, update the timer
 
   m_half_line_count++;
+  m_frame_begin_event_retry_counter--;
   if (m_half_line_count == GetHalfLinesPerEvenField() + GetHalfLinesPerOddField())
   {
     m_half_line_count = 0;

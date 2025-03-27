@@ -440,6 +440,7 @@ private:
   u64 m_ticks_last_line_start = 0;  // number of ticks when the current full scanline started
   u32 m_half_line_count = 0;        // number of halflines that have occurred for this full frame
   u32 m_half_line_of_next_si_poll = 0;  // halfline when next SI poll results should be available
+  u32 m_frame_begin_event_retry_counter = 2000; //countdown for retrying the frame begin event
 
   // below indexes are 0-based
   u32 m_even_field_first_hl = 0;  // index first halfline of the even field
