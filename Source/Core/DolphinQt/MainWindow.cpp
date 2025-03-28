@@ -1018,6 +1018,7 @@ bool MainWindow::RequestStop()
     // Tell NetPlay about the power event
     if (NetPlay::IsNetPlayRunning())
       NetPlay::SendPowerButtonEvent();
+    MainWindow::RequestStop();
 
     return true;
   }
