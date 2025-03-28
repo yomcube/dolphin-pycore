@@ -124,6 +124,24 @@ static PyObject* toggle_play(PyObject* module, PyObject* args)
   Py_RETURN_NONE;
 }
 
+static PyObject* is_paused(PyObject* module, PyObject* args)
+{
+  Core::State current_state = GetState(Core::System::GetInstance());
+
+    switch (current_state)
+    {
+    case Core::State::Paused:
+      Py_RETURN_TRUE;
+      break;
+    case Core::State::Running:
+      Py_RETURN_FALSE;
+      break;
+    default:
+      Py_RETURN_NONE;
+      break;
+    }
+}
+
 static void setup_file_module(PyObject* module, FileState* state)
 {
   // I don't think we need anything here yet
@@ -143,6 +161,7 @@ PyMODINIT_FUNC PyInit_dol_utils()
                                   {"is_audiodumping", is_audiodumping, METH_NOARGS, ""},
                                   {"save_screenshot", (PyCFunction) save_screenshot, METH_VARARGS | METH_KEYWORDS, ""},
                                   {"toggle_play", toggle_play, METH_NOARGS, ""},
+                                  {"is_paused", is_paused, METH_NOARGS, ""},
                                   {nullptr, nullptr, 0, nullptr}};
   static PyModuleDef module_def =
       Py::MakeStatefulModuleDef<FileState, setup_file_module>("dolphin_utils", methods);
