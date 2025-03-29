@@ -30,6 +30,7 @@
 #ifdef HAS_LIBMGBA
 #include "DolphinQt/GBAWidget.h"
 #endif
+#include "DolphinQt/MainWindow.h"
 #include "DolphinQt/QtUtils/QueueOnObject.h"
 #include "DolphinQt/Settings.h"
 
@@ -131,6 +132,26 @@ bool Host::GetRenderFocus()
 #endif
 }
 
+int Host::GetRenderX()
+{
+  return m_render_x;
+}
+
+int Host::GetRenderY()
+{
+  return m_render_y;
+}
+
+int Host::GetRenderWidth()
+{
+  return m_render_width;
+}
+
+int Host::GetRenderHeight()
+{
+  return m_render_height;
+}
+
 bool Host::GetRenderFullFocus()
 {
   return m_render_full_focus;
@@ -147,6 +168,15 @@ void Host::SetRenderFocus(bool focus)
     });
   }
 }
+
+void Host::SetRenderGeometry(int x, int y, int width, int height)
+{
+  m_render_x = x;
+  m_render_y = y;
+  m_render_width = width;
+  m_render_height = height;
+}
+
 
 void Host::SetRenderFullFocus(bool focus)
 {
@@ -226,6 +256,26 @@ void Host_UpdateTitle(const std::string& title)
 bool Host_RendererHasFocus()
 {
   return Host::GetInstance()->GetRenderFocus() || Host::GetInstance()->GetGBAFocus();
+}
+
+int Host_GetRendererX()
+{
+  return Host::GetInstance()->GetRenderX();
+}
+
+int Host_GetRendererY()
+{
+  return Host::GetInstance()->GetRenderY();
+}
+
+int Host_GetRendererWidth()
+{
+  return Host::GetInstance()->GetRenderWidth();
+}
+
+int Host_GetRendererHeight()
+{
+  return Host::GetInstance()->GetRenderHeight();
 }
 
 bool Host_RendererHasFullFocus()

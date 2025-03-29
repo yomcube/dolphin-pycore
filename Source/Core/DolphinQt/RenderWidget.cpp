@@ -76,6 +76,8 @@ RenderWidget::RenderWidget(QWidget* parent) : QWidget(parent)
           Qt::DirectConnection);
   connect(this, &RenderWidget::FocusChanged, Host::GetInstance(), &Host::SetRenderFocus,
           Qt::DirectConnection);
+  connect(this, &RenderWidget::GeometryChanged, Host::GetInstance(), &Host::SetRenderGeometry,
+          Qt::DirectConnection);
 
   m_mouse_timer = new QTimer(this);
   connect(m_mouse_timer, &QTimer::timeout, this, &RenderWidget::HandleCursorTimer);
@@ -464,14 +466,27 @@ bool RenderWidget::event(QEvent* event)
     emit FocusChanged(false);
     break;
   case QEvent::Move:
+  {
     SetCursorLocked(m_cursor_locked);
+    QRect rr = geometry();
+    QScreen* screen = window()->windowHandle()->screen();
+    const float dpr = screen->devicePixelRatio();
+    const int x = rr.left() * dpr;
+    const int y = rr.top() * dpr;
+    const int w = rr.width() * dpr;
+    const int h = rr.height() * dpr;
+    emit GeometryChanged(x, y, w, h);
     break;
+  }
+    
 
   // According to https://bugreports.qt.io/browse/QTBUG-95925 the recommended practice for
   // handling DPI change is responding to paint events
   case QEvent::Paint:
   case QEvent::Resize:
   {
+    QRect rr = geometry();
+    emit GeometryChanged(rr.left(), rr.top(), rr.width(), rr.height());
     SetCursorLocked(m_cursor_locked);
 
     const QResizeEvent* se = static_cast<QResizeEvent*>(event);

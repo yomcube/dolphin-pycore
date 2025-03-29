@@ -22,6 +22,10 @@ public:
   static Host* GetInstance();
 
   bool GetRenderFocus();
+  int GetRenderX();
+  int GetRenderY();
+  int GetRenderWidth();
+  int GetRenderHeight();
   bool GetRenderFullFocus();
   bool GetRenderFullscreen();
   bool GetGBAFocus();
@@ -30,6 +34,7 @@ public:
   void SetMainWindowHandle(void* handle);
   void SetRenderHandle(void* handle);
   void SetRenderFocus(bool focus);
+  void SetRenderGeometry(int x, int y, int width, int height);
   void SetRenderFullFocus(bool focus);
   void SetRenderFullscreen(bool fullscreen);
   void SetTASInputFocus(bool focus);
@@ -52,6 +57,10 @@ private:
   std::atomic<void*> m_main_window_handle{nullptr};
   std::atomic<bool> m_render_to_main{false};
   std::atomic<bool> m_render_focus{false};
+  int m_render_x = 0;
+  int m_render_y = 0;
+  int m_render_width = 0;
+  int m_render_height = 0;
   std::atomic<bool> m_render_full_focus{false};
   std::atomic<bool> m_render_fullscreen{false};
   std::atomic<bool> m_tas_input_focus{false};

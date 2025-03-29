@@ -86,6 +86,26 @@ bool Host_RendererHasFocus()
   return false;
 }
 
+int Host_GetRendererX()
+{
+  return 0;
+}
+
+int Host_GetRendererY()
+{
+  return 0;
+}
+
+int Host_GetRendererWidth()
+{
+  return 0;
+}
+
+int Host_GetRendererHeight()
+{
+  return 0;
+}
+
 bool Host_RendererHasFullFocus()
 {
   return false;

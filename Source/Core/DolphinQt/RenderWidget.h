@@ -31,6 +31,7 @@ signals:
   void StateChanged(bool fullscreen);
   void SizeChanged(int new_width, int new_height);
   void FocusChanged(bool focus);
+  void GeometryChanged(int x, int y, int width, int height);
 
 private:
   void HandleCursorTimer();
@@ -50,6 +51,8 @@ private:
   QPoint m_last_mouse{};
   int m_last_window_width = 0;
   int m_last_window_height = 0;
+  int m_last_window_x = 0;
+  int m_last_window_y = 0;
   float m_last_window_scale = 0;
   bool m_cursor_locked = false;
   bool m_lock_cursor_on_next_activation = false;

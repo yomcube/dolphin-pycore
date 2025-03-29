@@ -8,6 +8,7 @@
 #include "Core/Config/MainSettings.h"
 #include "Core/Core.h"
 #include "Core/ConfigManager.h"
+#include "Core/Host.h"
 #include "Core/System.h"
 #include "Scripting/Python/Utils/module.h"
 #include "Scripting/Python/Utils/as_py_func.h"
@@ -142,6 +143,27 @@ static PyObject* is_paused(PyObject* module, PyObject* args)
     }
 }
 
+static PyObject* renderer_has_focus(PyObject* module, PyObject* args)
+{
+  bool focus = Host_RendererHasFocus();
+
+  if (focus)
+    Py_RETURN_TRUE;
+  else
+    Py_RETURN_FALSE;
+}
+
+static PyObject* renderer_geometry(PyObject* module, PyObject* args)
+{
+  int x = Host_GetRendererX();
+  int y = Host_GetRendererY();
+  int w = Host_GetRendererWidth();
+  int h = Host_GetRendererHeight();
+  return Py_BuildValue("iiii", x, y, w, h);
+}
+
+
+
 static void setup_file_module(PyObject* module, FileState* state)
 {
   // I don't think we need anything here yet
@@ -162,6 +184,8 @@ PyMODINIT_FUNC PyInit_dol_utils()
                                   {"save_screenshot", (PyCFunction) save_screenshot, METH_VARARGS | METH_KEYWORDS, ""},
                                   {"toggle_play", toggle_play, METH_NOARGS, ""},
                                   {"is_paused", is_paused, METH_NOARGS, ""},
+                                  {"renderer_has_focus", renderer_has_focus, METH_NOARGS, ""},
+                                  {"renderer_geometry", renderer_geometry, METH_NOARGS, ""},
                                   {nullptr, nullptr, 0, nullptr}};
   static PyModuleDef module_def =
       Py::MakeStatefulModuleDef<FileState, setup_file_module>("dolphin_utils", methods);
