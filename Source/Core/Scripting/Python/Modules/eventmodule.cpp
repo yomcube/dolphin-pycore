@@ -70,7 +70,9 @@ using EventModuleState = GenericEventModuleState<
   API::Events::SaveStateLoad,
   API::Events::BeforeSaveStateLoad,
   API::Events::FrameBegin,
-  API::Events::Unpause
+  API::Events::Unpause,
+  API::Events::FocusChange,
+  API::Events::RenderGeometryChange
 >;
 
 // These template shenanigans are all required for PyEventFromMappingFunc
@@ -268,6 +270,14 @@ static const std::tuple<> PyUnpause(const API::Events::Unpause& evt)
 {
   return std::make_tuple();
 }
+static const std::tuple<bool> PyFocusChange(const API::Events::FocusChange& evt)
+{
+  return std::make_tuple(evt.has_focus);
+}
+static const std::tuple<int, int, int, int> PyRenderGeometryChange(const API::Events::RenderGeometryChange& evt)
+{
+  return std::make_tuple(evt.x, evt.y, evt.w, evt.h);
+}
 
 // EVENT DEFINITIONS
 // Creates a PyEvent class from the signature.
@@ -280,6 +290,8 @@ using PySaveStateLoadEvent = PyEventFromMappingFunc<PySaveStateLoad>;
 using PyBeforeSaveStateLoadEvent = PyEventFromMappingFunc<PyBeforeSaveStateLoad>;
 using PyFrameBeginEvent = PyEventFromMappingFunc<PyFrameBegin>;
 using PyUnpauseEvent = PyEventFromMappingFunc<PyUnpause>;
+using PyFocusChangeEvent = PyEventFromMappingFunc<PyFocusChange>;
+using PyRenderGeometryChangeEvent = PyEventFromMappingFunc<PyRenderGeometryChange>;
 
 // HOOKING UP PY EVENTS TO DOLPHIN EVENTS
 // For all python events listed here, listens to the respective API::Events event
@@ -293,7 +305,9 @@ using EventTuple = std::tuple<
   PySaveStateLoadEvent,
   PyBeforeSaveStateLoadEvent,
   PyFrameBeginEvent,
-  PyUnpauseEvent
+  PyUnpauseEvent,
+  PyFocusChangeEvent,
+  PyRenderGeometryChangeEvent
   >;
 using EventContainer = PythonEventContainer<
   PyFrameAdvanceEvent,
@@ -304,7 +318,9 @@ using EventContainer = PythonEventContainer<
   PySaveStateLoadEvent,
   PyBeforeSaveStateLoadEvent,
   PyFrameBeginEvent,
-  PyUnpauseEvent
+  PyUnpauseEvent,
+  PyFocusChangeEvent,
+  PyRenderGeometryChangeEvent
 >;
 template <>
 const EventTuple EventContainer::s_pyevents = {};
@@ -324,6 +340,8 @@ std::optional<CoroutineScheduler> GetCoroutineScheduler(std::string aeventname)
       {"beforesavestateload", PyBeforeSaveStateLoadEvent::ScheduleCoroutine},
       {"framebegin", PyFrameBeginEvent::ScheduleCoroutine},
       {"unpause", PyUnpauseEvent::ScheduleCoroutine},
+      {"focuschange", PyFocusChangeEvent::ScheduleCoroutine},
+      {"rendergeometrychange", PyRenderGeometryChangeEvent::ScheduleCoroutine},
   };
   auto iter = lookup.find(aeventname);
   if (iter == lookup.end())
@@ -368,6 +386,12 @@ async def framebegin():
 
 async def unpause():
     return (await _DolphinAsyncEvent("unpause"))
+
+async def focuschange():
+    return (await _DolphinAsyncEvent("focuschange"))
+
+async def rendergeometrychange():
+    return (await _DolphinAsyncEvent("rendergeometrychange"))
 )";
   Py::Object result = Py::LoadPyCodeIntoModule(module, pycode);
   if (result.IsNull())
@@ -412,6 +436,8 @@ PyMODINIT_FUNC PyInit_event()
       Py::MakeMethodDef<PyBeforeSaveStateLoadEvent::SetCallback>("on_beforesavestateload"),
       Py::MakeMethodDef<PyFrameBeginEvent::SetCallback>("on_framebegin"),
       Py::MakeMethodDef<PyUnpauseEvent::SetCallback>("on_unpause"),
+      Py::MakeMethodDef<PyFocusChangeEvent::SetCallback>("on_focuschange"),
+      Py::MakeMethodDef<PyRenderGeometryChangeEvent::SetCallback>("on_rendergeometrychange"),
       Py::MakeMethodDef<Reset>("_dolphin_reset"),
       Py::MakeMethodDef<SystemReset>("system_reset"),
 

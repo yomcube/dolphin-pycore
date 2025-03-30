@@ -469,12 +469,13 @@ bool RenderWidget::event(QEvent* event)
   {
     SetCursorLocked(m_cursor_locked);
     QRect rr = geometry();
-    QScreen* screen = window()->windowHandle()->screen();
-    const float dpr = screen->devicePixelRatio();
-    const int x = rr.left() * dpr;
-    const int y = rr.top() * dpr;
-    const int w = rr.width() * dpr;
-    const int h = rr.height() * dpr;
+    QPoint anchor = pos();
+    //QScreen* screen = window()->windowHandle()->screen();
+    // const float dpr = screen->devicePixelRatio();
+    const int x = anchor.x() ;//* dpr;
+    const int y = anchor.y();  //* dpr;
+    const int w = width();  //* dpr;
+    const int h = height() ; //* dpr;
     emit GeometryChanged(x, y, w, h);
     break;
   }

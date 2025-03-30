@@ -16,7 +16,7 @@
 #endif
 
 #include "Common/Common.h"
-
+#include "Core/API/Events.h"
 #include "Core/Config/MainSettings.h"
 #include "Core/ConfigManager.h"
 #include "Core/Core.h"
@@ -167,6 +167,17 @@ void Host::SetRenderFocus(bool focus)
         g_gfx->SetFullscreen(focus);
     });
   }
+  //Not sure how to emit this event correctly to avoid crashes.
+  Core::QueueHostJob([focus](Core::System& system) {
+    Core::RunOnCPUThread(
+        system,
+        [&] {
+          API::GetEventHub().EmitEvent(API::Events::FocusChange{focus});
+        },
+        true);
+    
+  });
+  
 }
 
 void Host::SetRenderGeometry(int x, int y, int width, int height)
@@ -175,8 +186,16 @@ void Host::SetRenderGeometry(int x, int y, int width, int height)
   m_render_y = y;
   m_render_width = width;
   m_render_height = height;
+  Core::QueueHostJob([x, y, width, height](Core::System& system) {
+    Core::RunOnCPUThread(
+        system,
+        [&] {
+          API::GetEventHub().EmitEvent(API::Events::RenderGeometryChange{x, y, width, height});
+        },
+        true);
+  });
+  
 }
-
 
 void Host::SetRenderFullFocus(bool focus)
 {

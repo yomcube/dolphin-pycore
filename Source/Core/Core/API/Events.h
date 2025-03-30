@@ -64,6 +64,17 @@ struct FrameBegin
 struct Unpause
 {
 };
+struct FocusChange
+{
+  bool has_focus;
+};
+struct RenderGeometryChange
+{
+  int x;
+  int y;
+  int w;
+  int h;
+};
 
 }  // namespace API::Events
 
@@ -211,7 +222,9 @@ using EventHub = GenericEventHub<
   Events::SaveStateLoad,
   Events::BeforeSaveStateLoad,
   Events::FrameBegin,
-  Events::Unpause
+  Events::Unpause,
+  Events::FocusChange,
+  Events::RenderGeometryChange
 >;
 
 // global event hub
