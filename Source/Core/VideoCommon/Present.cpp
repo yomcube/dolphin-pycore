@@ -201,7 +201,8 @@ void Presenter::ViSwap(u32 xfb_addr, u32 fb_width, u32 fb_stride, u32 fb_height,
 
   if (!is_duplicate || !g_ActiveConfig.bSkipPresentingDuplicateXFBs)
   {
-    Present();
+    if (!Config::Get(Config::MAIN_REMOVE_UI_DELAY))
+      Present();
     ProcessFrameDumping(ticks);
 
     AfterPresentEvent::Trigger(present_info);
@@ -220,7 +221,8 @@ void Presenter::ImmediateSwap(u32 xfb_addr, u32 fb_width, u32 fb_stride, u32 fb_
 
   BeforePresentEvent::Trigger(present_info);
 
-  Present();
+  if (!Config::Get(Config::MAIN_REMOVE_UI_DELAY))
+    Present();
   ProcessFrameDumping(ticks);
 
   AfterPresentEvent::Trigger(present_info);
@@ -887,9 +889,9 @@ void Presenter::Present()
     SetSuggestedWindowSize(m_xfb_rect.GetWidth(), m_xfb_rect.GetHeight());
   }
 
-  if (m_onscreen_ui)
+ if (m_onscreen_ui)
     m_onscreen_ui->BeginImGuiFrame(m_backbuffer_width, m_backbuffer_height);
-
+  
   g_gfx->EndUtilityDrawing();
 }
 

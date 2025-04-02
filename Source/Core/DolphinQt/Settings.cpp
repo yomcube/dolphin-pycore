@@ -430,6 +430,12 @@ void Settings::SetGraphicModsEnabled(bool enabled)
   emit EnableGfxModsChanged(enabled);
 }
 
+bool Settings::GetNoUIDelayEnabled() const
+{
+  return Config::Get(Config::MAIN_REMOVE_UI_DELAY);
+}
+
+
 int Settings::GetVolume() const
 {
   return Config::Get(Config::MAIN_AUDIO_VOLUME);

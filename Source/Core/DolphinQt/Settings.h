@@ -129,6 +129,7 @@ public:
   bool IsKeepWindowOnTopEnabled() const;
   bool GetGraphicModsEnabled() const;
   void SetGraphicModsEnabled(bool enabled);
+  bool GetNoUIDelayEnabled() const;
 
   // Audio
   int GetVolume() const;
@@ -229,6 +230,7 @@ signals:
   void USBKeyboardConnectionChanged(bool connected);
   void EnableGfxModsChanged(bool enabled);
   void HardcoreStateChanged();
+  void NoUIDelayChanged(bool enabled);
 
 private:
   Settings();

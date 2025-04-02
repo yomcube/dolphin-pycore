@@ -268,6 +268,7 @@ const Info<bool> MAIN_RENDER_WINDOW_AUTOSIZE{{System::Main, "Display", "RenderWi
                                              false};
 const Info<bool> MAIN_RENDER_WINDOW_LOCK_RIGHT{{System::Main, "Display", "RenderWindowLockRight"},
                                                true};
+const Info<bool> MAIN_REMOVE_UI_DELAY{{System::Main, "Display", "NoUIDelay"}, false};
 const Info<bool> MAIN_KEEP_WINDOW_ON_TOP{{System::Main, "Display", "KeepWindowOnTop"}, false};
 const Info<bool> MAIN_DISABLE_SCREENSAVER{{System::Main, "Display", "DisableScreenSaver"}, true};
 

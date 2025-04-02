@@ -9,6 +9,7 @@
 #include "Common/FileUtil.h"
 #include "Common/MsgHandler.h"
 #include "Core/ConfigManager.h"
+#include "Core/Config/MainSettings.h"
 
 #include "VideoCommon/AbstractGfx.h"
 #include "VideoCommon/ConstantManager.h"
@@ -183,8 +184,8 @@ void ShaderCache::WaitForAsyncCompiler()
                          ImVec2(-1.0f, 0.0f), "");
     }
     ImGui::End();
-
-    g_presenter->Present();
+    if (!Config::Get(Config::MAIN_REMOVE_UI_DELAY))
+      g_presenter->Present();
   };
 
   while (running &&
@@ -196,7 +197,8 @@ void ShaderCache::WaitForAsyncCompiler()
   }
 
   // An extra Present to clear the screen
-  g_presenter->Present();
+  if (!Config::Get(Config::MAIN_REMOVE_UI_DELAY))
+    g_presenter->Present();
 }
 
 template <typename SerializedUidType, typename UidType>

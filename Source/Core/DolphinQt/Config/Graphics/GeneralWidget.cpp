@@ -119,6 +119,7 @@ void GeneralWidget::CreateWidgets()
                                             Config::MAIN_RENDER_WINDOW_AUTOSIZE, m_game_layer);
   m_lock_window_to_right =
       new ConfigBool(tr("Lock Window to Right"), Config::MAIN_RENDER_WINDOW_LOCK_RIGHT, m_game_layer);
+  m_no_ui_delay = new ConfigBool(tr("Remove UI Delay"), Config::MAIN_REMOVE_UI_DELAY, m_game_layer);
   m_show_messages =
       new ConfigBool(tr("Show NetPlay Messages"), Config::GFX_SHOW_NETPLAY_MESSAGES, m_game_layer);
   m_render_main_window =
@@ -130,6 +131,8 @@ void GeneralWidget::CreateWidgets()
   m_options_layout->addWidget(m_autoadjust_window_size, 1, 0);
 
   m_options_layout->addWidget(m_lock_window_to_right, 2, 0);
+  m_options_layout->addWidget(m_no_ui_delay, 2, 1);
+
   m_options_layout->addWidget(m_show_messages, 0, 1);
 
   m_options_layout->addWidget(m_show_ping, 1, 1);
@@ -265,6 +268,10 @@ void GeneralWidget::AddDescriptions()
       QT_TR_NOOP("Uses the main Dolphin window for rendering rather than "
                  "a separate render window.<br><br><dolphin_emphasis>If unsure, leave "
                  "this unchecked.</dolphin_emphasis>");
+  static const char TR_NO_UI_DELAY_DESCRIPTION[] =
+      QT_TR_NOOP("Makes infodisplay 0 delay.<br><br>Disable if you are running into issues."
+                 "<br><br><dolphin_emphasis>If "
+                 "unsure, leave this unchecked.</dolphin_emphasis>");
   static const char TR_ASPECT_RATIO_DESCRIPTION[] = QT_TR_NOOP(
       "Selects which aspect ratio to use for displaying the game."
       "<br><br>The aspect ratio of the image sent out by the original consoles varied depending on "
@@ -348,6 +355,8 @@ void GeneralWidget::AddDescriptions()
   m_show_messages->SetDescription(tr(TR_SHOW_NETPLAY_MESSAGES_DESCRIPTION));
 
   m_render_main_window->SetDescription(tr(TR_RENDER_TO_MAINWINDOW_DESCRIPTION));
+
+  m_no_ui_delay->SetDescription(tr(TR_NO_UI_DELAY_DESCRIPTION));
 
   m_shader_compilation_mode[0]->SetDescription(tr(TR_SHADER_COMPILE_SPECIALIZED_DESCRIPTION));
 
