@@ -512,6 +512,11 @@ bool Settings::GetCheatsEnabled() const
   return Config::Get(Config::MAIN_ENABLE_CHEATS);
 }
 
+bool Settings::GetBackupLoadStateEnabled() const
+{
+  return Config::Get(Config::MAIN_ENABLE_BACKUP_LOADSTATE);
+}
+
 void Settings::SetDebugModeEnabled(bool enabled)
 {
   if (AchievementManager::GetInstance().IsHardcoreModeActive())

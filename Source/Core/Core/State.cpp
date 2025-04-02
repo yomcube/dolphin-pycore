@@ -38,6 +38,7 @@
 #include "Core/API/Events.h"
 #include "Core/AchievementManager.h"
 #include "Core/Config/AchievementSettings.h"
+#include "Core/Config/MainSettings.h"
 #include "Core/ConfigManager.h"
 #include "Core/Core.h"
 #include "Core/CoreTiming.h"
@@ -903,7 +904,7 @@ void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int
           API::GetEventHub().EmitEvent(API::Events::BeforeSaveStateLoad{is_slot, slot});
         // Save temp buffer for undo load state
         auto& movie = system.GetMovie();
-        if (!movie.IsJustStartingRecordingInputFromSaveState())
+        if (!movie.IsJustStartingRecordingInputFromSaveState() && Config::Get(Config::MAIN_ENABLE_BACKUP_LOADSTATE))
         {
           std::lock_guard lk2(s_undo_load_buffer_mutex);
           SaveToBuffer(system, s_undo_load_buffer, emit_event);

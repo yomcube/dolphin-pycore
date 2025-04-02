@@ -110,6 +110,7 @@ public:
   // Emulation
   int GetStateSlot() const;
   void SetStateSlot(int);
+  bool GetBackupLoadStateEnabled() const;
   bool IsBatchModeEnabled() const;
   void SetBatchModeEnabled(bool batch);
 
@@ -208,6 +209,7 @@ signals:
   void ToolBarVisibilityChanged(bool visible);
   void WidgetLockChanged(bool locked);
   void EnableCheatsChanged(bool enabled);
+  void BackupLoadStateChanged(bool enabled);
   void WatchVisibilityChanged(bool visible);
   void BreakpointsVisibilityChanged(bool visible);
   void CodeVisibilityChanged(bool visible);

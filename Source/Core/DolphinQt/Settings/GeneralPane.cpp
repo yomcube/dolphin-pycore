@@ -102,6 +102,8 @@ void GeneralPane::ConnectLayout()
 {
   connect(m_checkbox_cheats, &QCheckBox::toggled, &Settings::Instance(),
           &Settings::EnableCheatsChanged);
+  connect(m_checkbox_backup_loadstate, &QCheckBox::toggled, &Settings::Instance(),
+          &Settings::BackupLoadStateChanged);
 #ifdef USE_DISCORD_PRESENCE
   connect(m_checkbox_discord_presence, &QCheckBox::toggled, this, &GeneralPane::OnSaveConfig);
 #endif
@@ -145,6 +147,11 @@ void GeneralPane::CreateBasic()
 
   m_checkbox_cheats = new ConfigBool(tr("Enable Cheats"), Config::MAIN_ENABLE_CHEATS);
   basic_group_layout->addWidget(m_checkbox_cheats);
+
+  // Blounard : Option to disable the backup before loading a savestate.
+  // Allow for faster loadstate, but makes impossible to use the option 'undo load state'
+  m_checkbox_backup_loadstate = new ConfigBool(tr("Backup before loadstate"), Config::MAIN_ENABLE_BACKUP_LOADSTATE);
+  basic_group_layout->addWidget(m_checkbox_backup_loadstate);
 
   m_checkbox_override_region_settings =
       new ConfigBool(tr("Allow Mismatched Region Settings"), Config::MAIN_OVERRIDE_REGION_SETTINGS);
@@ -379,6 +386,11 @@ void GeneralPane::AddDescriptions()
       "These codes can be configured with the Cheats Manager in the Tools menu."
       "<br><br>This setting cannot be changed while emulation is active."
       "<br><br><dolphin_emphasis>If unsure, leave this unchecked.</dolphin_emphasis>");
+  static constexpr char TR_BACKUP_LOADSTATE_DESCRIPTION[] = QT_TR_NOOP(
+      "Make Dolphin save a backup of the game's current state before doing a LoadState."
+      "Having this option enabled allow you to use the 'Undo Load State' command"
+      ", at the cost of a slightly longer LoadState duration."
+      "<br><br><dolphin_emphasis>If unsure, leave this checked.</dolphin_emphasis>");
   static constexpr char TR_OVERRIDE_REGION_SETTINGS_DESCRIPTION[] =
       QT_TR_NOOP("Lets you use languages and other region-related settings that the game may not "
                  "be designed for. May cause various crashes and bugs."
@@ -442,6 +454,8 @@ void GeneralPane::AddDescriptions()
   m_checkbox_dualcore->SetDescription(tr(TR_DUALCORE_DESCRIPTION));
 
   m_checkbox_cheats->SetDescription(tr(TR_CHEATS_DESCRIPTION));
+
+  m_checkbox_backup_loadstate->SetDescription(tr(TR_BACKUP_LOADSTATE_DESCRIPTION));
 
   m_checkbox_override_region_settings->SetDescription(tr(TR_OVERRIDE_REGION_SETTINGS_DESCRIPTION));
 

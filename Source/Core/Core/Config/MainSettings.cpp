@@ -49,6 +49,7 @@ const Info<bool> MAIN_CPU_THREAD{{System::Main, "Core", "CPUThread"}, false};
 const Info<bool> MAIN_SYNC_ON_SKIP_IDLE{{System::Main, "Core", "SyncOnSkipIdle"}, true};
 const Info<std::string> MAIN_DEFAULT_ISO{{System::Main, "Core", "DefaultISO"}, ""};
 const Info<bool> MAIN_ENABLE_CHEATS{{System::Main, "Core", "EnableCheats"}, false};
+const Info<bool> MAIN_ENABLE_BACKUP_LOADSTATE{{System::Main, "Core", "EnableBackupLoadState"}, true};
 const Info<int> MAIN_GC_LANGUAGE{{System::Main, "Core", "SelectedLanguage"}, 0};
 const Info<bool> MAIN_OVERRIDE_REGION_SETTINGS{{System::Main, "Core", "OverrideRegionSettings"},
                                                false};
@@ -761,6 +762,11 @@ bool IsDefaultGCIFolderPathConfigured(ExpansionInterface::Slot slot)
 bool AreCheatsEnabled()
 {
   return Config::Get(::Config::MAIN_ENABLE_CHEATS);
+}
+
+bool AreBackupLoadStateEnabled()
+{
+  return Config::Get(::Config::MAIN_ENABLE_BACKUP_LOADSTATE);
 }
 
 bool IsDebuggingEnabled()
