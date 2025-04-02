@@ -56,3 +56,27 @@ def save_screenshot(filename: str | None = None) -> None:
 
 def toggle_play() -> None:
     """Plays/Pauses the current game."""
+
+
+def is_paused() -> bool:
+    """
+    Checks if the emulation is currently paused.
+
+    :return: value as bool
+    """
+	
+	
+def renderer_has_focus() -> bool:
+    """
+    Checks if the render window has focus.
+
+    :return: value as bool
+    """
+
+
+def renderer_geometry() -> (int, int, int, int):
+    """
+    Get the geometry value of the rendering QtWidget
+
+    :return: (x, y, width, height) as (int, int, int, int)
+    """
