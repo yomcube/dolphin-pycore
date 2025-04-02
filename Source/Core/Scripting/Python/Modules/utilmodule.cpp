@@ -171,7 +171,7 @@ static void setup_file_module(PyObject* module, FileState* state)
 
 PyMODINIT_FUNC PyInit_dol_utils()
 {
-  scriptDir = File::GetUserPath(D_LOAD_IDX) + "Scripts";
+  scriptDir = File::GetUserPath(D_SCRIPTS_IDX);
   static PyMethodDef methods[] = {{"get_game_id", get_game_id, METH_NOARGS, ""},
                                   {"get_script_dir", get_script_dir, METH_NOARGS, ""},
                                   {"open_file", open_file, METH_NOARGS, ""},

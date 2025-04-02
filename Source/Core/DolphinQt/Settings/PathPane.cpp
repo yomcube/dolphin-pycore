@@ -65,6 +65,17 @@ void PathPane::BrowseWiiNAND()
   }
 }
 
+void PathPane::BrowseScript()
+{
+  QString dir = QDir::toNativeSeparators(DolphinFileDialog::getExistingDirectory(
+      this, tr("Select Scripts Path"), QString::fromStdString(Config::Get(Config::MAIN_SCRIPT_PATH))));
+  if (!dir.isEmpty())
+  {
+    m_script_edit->setText(dir);
+    Config::SetBase(Config::MAIN_SCRIPT_PATH, dir.toStdString());
+  }
+}
+
 void PathPane::BrowseDump()
 {
   QString dir = QDir::toNativeSeparators(DolphinFileDialog::getExistingDirectory(
@@ -212,6 +223,15 @@ QGridLayout* PathPane::MakePathsLayout()
   layout->addWidget(m_load_edit, 3, 1);
   layout->addWidget(load_open, 3, 2);
 
+  m_script_edit = new QLineEdit(QString::fromStdString(File::GetUserPath(D_SCRIPTS_IDX)));
+  connect(m_script_edit, &QLineEdit::editingFinished,
+          [this] { Config::SetBase(Config::MAIN_SCRIPT_PATH, m_script_edit->text().toStdString()); });
+  QPushButton* script_open = new NonDefaultQPushButton(QStringLiteral("..."));
+  connect(script_open, &QPushButton::clicked, this, &PathPane::BrowseScript);
+  layout->addWidget(new QLabel(tr("Script Path:")), 4, 0);
+  layout->addWidget(m_script_edit, 4, 1);
+  layout->addWidget(script_open, 4, 2);
+
   m_resource_pack_edit =
       new QLineEdit(QString::fromStdString(File::GetUserPath(D_RESOURCEPACK_IDX)));
   connect(m_resource_pack_edit, &QLineEdit::editingFinished, [this] {
@@ -219,18 +239,18 @@ QGridLayout* PathPane::MakePathsLayout()
   });
   QPushButton* resource_pack_open = new NonDefaultQPushButton(QStringLiteral("..."));
   connect(resource_pack_open, &QPushButton::clicked, this, &PathPane::BrowseResourcePack);
-  layout->addWidget(new QLabel(tr("Resource Pack Path:")), 4, 0);
-  layout->addWidget(m_resource_pack_edit, 4, 1);
-  layout->addWidget(resource_pack_open, 4, 2);
+  layout->addWidget(new QLabel(tr("Resource Pack Path:")), 5, 0);
+  layout->addWidget(m_resource_pack_edit, 5, 1);
+  layout->addWidget(resource_pack_open, 5, 2);
 
   m_wfs_edit = new QLineEdit(QString::fromStdString(File::GetUserPath(D_WFSROOT_IDX)));
   connect(m_load_edit, &QLineEdit::editingFinished,
           [this] { Config::SetBase(Config::MAIN_WFS_PATH, m_wfs_edit->text().toStdString()); });
   QPushButton* wfs_open = new NonDefaultQPushButton(QStringLiteral("..."));
   connect(wfs_open, &QPushButton::clicked, this, &PathPane::BrowseWFS);
-  layout->addWidget(new QLabel(tr("WFS Path:")), 5, 0);
-  layout->addWidget(m_wfs_edit, 5, 1);
-  layout->addWidget(wfs_open, 5, 2);
+  layout->addWidget(new QLabel(tr("WFS Path:")), 6, 0);
+  layout->addWidget(m_wfs_edit, 6, 1);
+  layout->addWidget(wfs_open, 6, 2);
 
   return layout;
 }

@@ -23,6 +23,7 @@ private:
   void BrowseWiiNAND();
   void BrowseDump();
   void BrowseLoad();
+  void BrowseScript();
   void BrowseResourcePack();
   void BrowseWFS();
   QGroupBox* MakeGameFolderBox();
@@ -36,6 +37,7 @@ private:
   QLineEdit* m_nand_edit;
   QLineEdit* m_dump_edit;
   QLineEdit* m_load_edit;
+  QLineEdit* m_script_edit;
   QLineEdit* m_resource_pack_edit;
   QLineEdit* m_wfs_edit;
 

@@ -107,6 +107,7 @@ static void CreateWFSPath(const std::string& path)
 static void InitCustomPaths()
 {
   File::SetUserPath(D_WIIROOT_IDX, Config::Get(Config::MAIN_FS_PATH));
+  File::SetUserPath(D_SCRIPTS_IDX, Config::Get(Config::MAIN_SCRIPT_PATH));
   CreateLoadPath(Config::Get(Config::MAIN_LOAD_PATH));
   CreateDumpPath(Config::Get(Config::MAIN_DUMP_PATH));
   CreateResourcePackPath(Config::Get(Config::MAIN_RESOURCEPACK_PATH));
