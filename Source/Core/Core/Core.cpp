@@ -522,6 +522,7 @@ static void EmuThread(Core::System& system, std::unique_ptr<BootParameters> boot
   ASSERT(g_controller_interface.IsInit());
   g_controller_interface.ChangeWindow(wsi.render_window);
 
+  g_controller_interface.RefreshDevices();
   Pad::LoadConfig();
   Pad::LoadGBAConfig();
   Keyboard::LoadConfig();
