@@ -19,6 +19,7 @@
 #include "VideoCommon/FrameDumper.h"
 #include "VideoCommon/FramebufferManager.h"
 #include "VideoCommon/OnScreenUI.h"
+#include "VideoCommon/OnScreenDisplay.h"
 #include "VideoCommon/PostProcessing.h"
 #include "VideoCommon/Statistics.h"
 #include "VideoCommon/VertexManagerBase.h"
@@ -736,6 +737,11 @@ void Presenter::UpdateDrawRectangle()
   m_target_rectangle.top = static_cast<int>(std::round(win_height / 2.0 - int_draw_height / 2.0));
   m_target_rectangle.right = m_target_rectangle.left + int_draw_width;
   m_target_rectangle.bottom = m_target_rectangle.top + int_draw_height;
+
+  // Blounard - This add an offset to the left of the OSD Messages
+  // This way, OSD Messages are rendered on the emulation rectangle,
+  // so they don't overlap with infodisplay
+  OSD::SetObscuredPixelsLeft(m_target_rectangle.left);
 }
 
 std::tuple<float, float> Presenter::ScaleToDisplayAspectRatio(const int width, const int height,
