@@ -129,6 +129,7 @@ PyScriptingBackend::PyScriptingBackend(std::filesystem::path script_filepath,
     : m_event_hub(event_hub), m_gui(gui), m_gc_manip(gc_manip), m_wii_buttons_manip(wii_buttons_manip), m_wii_ir_manip(wii_ir_manip),
       m_nunchuck_buttons_manip(nunchuck_buttons_manip)
 {
+  m_script_path = script_filepath.string();
   std::lock_guard lock{s_bookkeeping_lock};
   if (s_instances.empty())
   {
@@ -251,6 +252,11 @@ PyScriptingBackend* PyScriptingBackend::GetCurrent()
   PyInterpreterState* interp_state = PyThreadState_Get()->interp;
   u64 interp_id = PyInterpreterState_GetID(interp_state);
   return s_instances[interp_id];
+}
+
+std::string PyScriptingBackend::GetScriptPath()
+{
+  return m_script_path; 
 }
 
 API::EventHub* PyScriptingBackend::GetEventHub()

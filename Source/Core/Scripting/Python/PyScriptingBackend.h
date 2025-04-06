@@ -32,6 +32,8 @@ public:
   API::WiiIRManip* GetWiiIRManip();
   API::NunchuckButtonsManip* GetNunchuckButtonsManip();
   void AddCleanupFunc(std::function<void()> cleanup_func);
+  std::string GetScriptPath();
+  
 
   // this class somewhat is a wrapper around a python interpreter state,
   // and that isn't copyable, so this class isn't copyable either.
@@ -55,6 +57,7 @@ private:
   API::WiiIRManip& m_wii_ir_manip;
   API::NunchuckButtonsManip& m_nunchuck_buttons_manip;
   std::vector<std::function<void()>> m_cleanups;
+  std::string m_script_path;
 };
 
 }  // namespace PyScripting

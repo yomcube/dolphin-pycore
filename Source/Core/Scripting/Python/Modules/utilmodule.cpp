@@ -10,6 +10,7 @@
 #include "Core/ConfigManager.h"
 #include "Core/Host.h"
 #include "Core/System.h"
+#include "Scripting/Python/PyScriptingBackend.h"
 #include "Scripting/Python/Utils/module.h"
 #include "Scripting/Python/Utils/as_py_func.h"
 #include "Scripting/ScriptList.h"
@@ -174,9 +175,9 @@ static PyObject* cancel_script(PyObject* module, PyObject* args, PyObject* kwarg
 
   if (filename)
   {
+    // We queue the cancel so it doesn't happen before the script main() is over
     Core::QueueHostJob(
         [filename](Core::System& system) { Scripts::g_scripts_to_stop.push_front(filename); });
-    //Scripts::g_scripts_to_stop.push_front(filename);
   }
 
   Py_RETURN_NONE;
@@ -193,9 +194,9 @@ static PyObject* activate_script(PyObject* module, PyObject* args, PyObject* kwa
 
   if (filename)
   {
+    // We queue the cancel so it doesn't happen before the script main() is over
      Core::QueueHostJob(
         [filename](Core::System& system) { Scripts::g_scripts_to_start.push_front(filename); });
-    //Scripts::g_scripts_to_start.push_front(filename);
   }
 
   Py_RETURN_NONE;
@@ -203,18 +204,9 @@ static PyObject* activate_script(PyObject* module, PyObject* args, PyObject* kwa
 
 static PyObject* get_script_name(PyObject* module, PyObject* args)
 {
-  int counter = 0;
-  std::string res = "oui";
+  PyScripting::PyScriptingBackend* cur_instance = PyScripting::PyScriptingBackend::GetCurrent();
 
-  for (auto it = Scripts::g_scripts.begin(); it != Scripts::g_scripts.end(); it++)
-  {
-    counter++;
-    if (counter == 2)
-    {
-      res = it->first;
-    }
-  }
-  return Py_BuildValue("s", res.c_str());
+  return Py_BuildValue("s", (cur_instance->GetScriptPath()).c_str());
 }
 
 static void setup_file_module(PyObject* module, FileState* state)
