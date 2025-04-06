@@ -75,6 +75,9 @@ struct RenderGeometryChange
   int w;
   int h;
 };
+struct TimerTick
+{
+};
 
 }  // namespace API::Events
 
@@ -224,7 +227,8 @@ using EventHub = GenericEventHub<
   Events::FrameBegin,
   Events::Unpause,
   Events::FocusChange,
-  Events::RenderGeometryChange
+  Events::RenderGeometryChange,
+  Events::TimerTick
 >;
 
 // global event hub

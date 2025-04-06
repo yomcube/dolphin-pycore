@@ -23,6 +23,7 @@ public:
   void SetCursorLockedOnNextActivation(bool locked = true);
   void SetWaitingForMessageBox(bool waiting_for_message_box);
   void SetCursorLocked(bool locked, bool follow_aspect_ratio = true);
+  void EmitScriptEvent();
 
 signals:
   void EscapePressed();
