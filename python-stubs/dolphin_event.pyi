@@ -133,13 +133,13 @@ async def beforesavestateload() -> tuple[bool, int]:
 class _BoolCallback(Protocol):
     def __call__(self, boolean: bool) -> None:
         """
-        Example callback stub for on_focuschange and/or on_unpause.
+        Example callback stub for on_focuschange.
 
         :param boolean: correspond to the has_focus state \
-		or is_paused state depending on the context
+		or other boolean depending on the context
         """
 		
-def on_unpause(callback: _BoolCallback | None) -> None:
+def on_unpause(callback: Callable[[], None] | None) -> None:
     """
     Registers a callback to be called on emulation unpause.
 
@@ -148,7 +148,7 @@ def on_unpause(callback: _BoolCallback | None) -> None:
     """
 
 
-async def unpause() -> bool:
+async def unpause() -> None:
     """Awaitable event that completes on emulation unpause."""
 
 
@@ -188,6 +188,15 @@ def on_rendergeometrychange(callback: _GeometryCallback | None) -> None:
 
 async def rendergeometrychange() -> tuple[int, int, int, int]:
     """Awaitable event that completes on render window geometry change."""
+	
+	
+def on_timertick(callback: Callable[[], None] | None) -> None:
+    """Registers a callback to be called 60 times per second"""
+
+
+async def frameadvance() -> None:
+    """Awaitable event that completes 60 times per second"""
+	
 	
 def system_reset() -> None:
     """Resets the emulation."""

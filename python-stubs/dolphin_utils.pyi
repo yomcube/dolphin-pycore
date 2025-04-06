@@ -10,7 +10,7 @@ def get_script_dir() -> str:
     """
 
 
-def open_dir() -> str:
+def open_file() -> str:
     """
     Prompts the user to open a file.
 
@@ -80,3 +80,18 @@ def renderer_geometry() -> (int, int, int, int):
 
     :return: (x, y, width, height) as (int, int, int, int)
     """
+
+def cancel_script(scriptPath : str) -> None:
+	"""Cancel the script with the corresponding path
+		The script cancel is delayed to when the host is free.
+		It means it won't cancel immediately, but it will cancel after
+		the current python script main() is over."""
+
+def activate_script(scriptPath : str) -> None:
+	"""Activate the script with the corresponding path
+		The script activate is delayed to when the host is free.
+		It means it won't cancel immediately, but it will cancel after
+		the current python script main() is over."""
+
+def get_script_name() -> str:
+	"""Return the filepath of the current script"""
