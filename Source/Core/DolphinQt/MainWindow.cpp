@@ -792,6 +792,7 @@ void MainWindow::RefreshGameList()
 {
   Settings::Instance().ReloadTitleDB();
   Settings::Instance().RefreshGameList();
+  g_controller_interface.RefreshDevices();
 }
 
 QStringList MainWindow::PromptFileNames()
@@ -1149,6 +1150,9 @@ void MainWindow::StartGame(std::unique_ptr<BootParameters>&& parameters)
 
   // We need the render widget before booting.
   ShowRenderWidget();
+
+  //Attempt to fix the keyboard hotkey issue
+  g_controller_interface.RefreshDevices();
 
   // Boot up, show an error if it fails to load the game.
   if (!BootManager::BootCore(m_system, std::move(parameters),
