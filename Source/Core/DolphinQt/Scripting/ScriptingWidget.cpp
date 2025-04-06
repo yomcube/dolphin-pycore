@@ -21,6 +21,7 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QTimer>
 
 #include "Common/FileUtil.h"
 #include "Common/MsgHandler.h"
@@ -78,6 +79,10 @@ ScriptingWidget::ScriptingWidget(QWidget* parent) : QDockWidget(parent)
   QWidget* main_widget = new QWidget;
   main_widget->setLayout(main_layout);
   this->setWidget(main_widget);
+
+  QTimer* pending_icon_timer = new QTimer(this);
+  connect(pending_icon_timer, &QTimer::timeout, this, &ScriptingWidget::UpdatePendingScripts);
+  pending_icon_timer->start(1000 / 60);
 
   connect(&Settings::Instance(), &Settings::ScriptingVisibilityChanged, this,
           &ScriptingWidget::setVisible);
@@ -142,6 +147,11 @@ void ScriptingWidget::ToggleSelectedScripts()
 {
   QModelIndex index = m_tree->currentIndex();
 
+  ToggleScriptIndex(index);
+}
+
+void ScriptingWidget::ToggleScriptIndex(QModelIndex index)
+{
   if (!index.isValid() || m_scripts_model->hasChildren(index))
     return;
 
@@ -151,6 +161,33 @@ void ScriptingWidget::ToggleSelectedScripts()
                            Qt::CheckStateRole);
 
   m_scripts_model->dataChanged(index, index, QList<int>(Qt::CheckStateRole));
+}
+
+void ScriptingWidget::SetScriptState(std::string file_path, bool activate)
+{
+  QModelIndex index = m_scripts_model->index(QString::fromStdString(file_path));
+  if (!index.isValid() || m_scripts_model->hasChildren(index))
+    return;
+  m_scripts_model->setData(index, activate ? Qt::Checked : Qt::Unchecked,
+                           Qt::CheckStateRole);
+  m_scripts_model->dataChanged(index, index, QList<int>(Qt::CheckStateRole));
+}
+
+void ScriptingWidget::UpdatePendingScripts()
+{
+  while (!Scripts::g_scripts_to_start.empty())
+  {
+    std::string file_path = Scripts::g_scripts_to_start.front();
+    SetScriptState(file_path, true);
+    Scripts::g_scripts_to_start.pop_front();
+  }
+
+  while (!Scripts::g_scripts_to_stop.empty())
+  {
+    std::string file_path = Scripts::g_scripts_to_stop.front();
+    SetScriptState(file_path, false);
+    Scripts::g_scripts_to_stop.pop_front();
+  }
 }
 
 void ScriptingWidget::closeEvent(QCloseEvent*)

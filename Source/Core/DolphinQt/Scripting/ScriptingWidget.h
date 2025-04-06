@@ -25,6 +25,9 @@ public:
   void AddNewScript();
   void RestartSelectedScripts();
   void ToggleSelectedScripts();
+  void ToggleScriptIndex(QModelIndex index);
+  void SetScriptState(std::string file_path, bool activate);
+  void UpdatePendingScripts();
 
 protected:
   void closeEvent(QCloseEvent*) override;

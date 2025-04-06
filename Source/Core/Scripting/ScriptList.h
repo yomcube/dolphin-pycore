@@ -7,6 +7,7 @@
 #include "Scripting/ScriptingEngine.h"
 
 #include <unordered_map>
+#include <list>
 
 namespace Scripts
 {
@@ -18,4 +19,6 @@ void StopAllScripts();
 // i.e. DolphinLib needs to access these variables even though they're housed in the Scripting unit
 extern std::unordered_map<std::string, Scripting::ScriptingBackend*> g_scripts;
 extern bool g_scripts_started;
+extern std::list<std::string> g_scripts_to_start;
+extern std::list<std::string> g_scripts_to_stop;
 }

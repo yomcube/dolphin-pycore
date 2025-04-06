@@ -12,6 +12,7 @@
 #include "Core/System.h"
 #include "Scripting/Python/Utils/module.h"
 #include "Scripting/Python/Utils/as_py_func.h"
+#include "Scripting/ScriptList.h"
 
 struct FileState
 {
@@ -162,7 +163,59 @@ static PyObject* renderer_geometry(PyObject* module, PyObject* args)
   return Py_BuildValue("iiii", x, y, w, h);
 }
 
+static PyObject* cancel_script(PyObject* module, PyObject* args, PyObject* kwargs)
+{
+  char* filename = nullptr;
+  char* temp = const_cast<char*>("filename");
+  static char* kwlist[] = {temp, NULL};
 
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|s", kwlist, &filename))
+    return nullptr;
+
+  if (filename)
+  {
+    Core::QueueHostJob(
+        [filename](Core::System& system) { Scripts::g_scripts_to_stop.push_front(filename); });
+    //Scripts::g_scripts_to_stop.push_front(filename);
+  }
+
+  Py_RETURN_NONE;
+}
+
+static PyObject* activate_script(PyObject* module, PyObject* args, PyObject* kwargs)
+{
+  char* filename = nullptr;
+  char* temp = const_cast<char*>("filename");
+  static char* kwlist[] = {temp, NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|s", kwlist, &filename))
+    return nullptr;
+
+  if (filename)
+  {
+     Core::QueueHostJob(
+        [filename](Core::System& system) { Scripts::g_scripts_to_start.push_front(filename); });
+    //Scripts::g_scripts_to_start.push_front(filename);
+  }
+
+  Py_RETURN_NONE;
+}
+
+static PyObject* get_script_name(PyObject* module, PyObject* args)
+{
+  int counter = 0;
+  std::string res = "oui";
+
+  for (auto it = Scripts::g_scripts.begin(); it != Scripts::g_scripts.end(); it++)
+  {
+    counter++;
+    if (counter == 2)
+    {
+      res = it->first;
+    }
+  }
+  return Py_BuildValue("s", res.c_str());
+}
 
 static void setup_file_module(PyObject* module, FileState* state)
 {
@@ -186,6 +239,9 @@ PyMODINIT_FUNC PyInit_dol_utils()
                                   {"is_paused", is_paused, METH_NOARGS, ""},
                                   {"renderer_has_focus", renderer_has_focus, METH_NOARGS, ""},
                                   {"renderer_geometry", renderer_geometry, METH_NOARGS, ""},
+                                  {"cancel_script", (PyCFunction) cancel_script, METH_VARARGS | METH_KEYWORDS, ""},
+                                  {"activate_script", (PyCFunction) activate_script, METH_VARARGS | METH_KEYWORDS, ""},
+                                  {"get_script_name", get_script_name, METH_NOARGS, ""},
                                   {nullptr, nullptr, 0, nullptr}};
   static PyModuleDef module_def =
       Py::MakeStatefulModuleDef<FileState, setup_file_module>("dolphin_utils", methods);
