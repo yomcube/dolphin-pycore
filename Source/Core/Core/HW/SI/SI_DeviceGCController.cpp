@@ -127,8 +127,6 @@ void CSIDevice_GCController::HandleMoviePadStatus(Movie::MovieManager& movie, in
                                                   GCPadStatus* pad_status)
 {
   movie.CallGCInputManip(pad_status, device_number);
-  //API::GetEventHub().EmitEvent(API::Events::FrameBegin{});
-  //API::GetGui().Render();
   API::GetGCManip().PerformInputManip(pad_status, device_number);
   
   movie.SetPolledDevice();

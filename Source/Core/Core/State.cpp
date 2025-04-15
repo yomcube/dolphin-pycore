@@ -225,13 +225,29 @@ void LoadFromBuffer(Core::System& system, std::vector<u8>& buffer, bool emit_eve
   Core::RunOnCPUThread(
       system,
       [&] {
-        if (emit_event)
+      if (emit_event)
+      {
+        const auto& ppc_state = system.GetPPCState();
+        ASSERT(Core::IsCPUThread());
+        Core::CPUThreadGuard guard(system);
+        if (!ppc_state.msr.DR || !ppc_state.msr.IR)
+          PanicAlertFmt("Send screenshot to Blounard. L234, PC {:x}", ppc_state.pc);
+        else
           API::GetEventHub().EmitEvent(API::Events::BeforeSaveStateLoad{false, -1});
+       }
         u8* ptr = buffer.data();
         PointerWrap p(&ptr, buffer.size(), PointerWrap::Mode::Read);
         DoState(system, p);
         if (emit_event)
-          API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{false, -1});
+        {
+          const auto& ppc_state = system.GetPPCState();
+          ASSERT(Core::IsCPUThread());
+          Core::CPUThreadGuard guard(system);
+          if (!ppc_state.msr.DR || !ppc_state.msr.IR)
+            PanicAlertFmt("Send screenshot to Blounard. L247, PC {:x}", ppc_state.pc);
+          else
+            API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{false, -1});
+        }
         if (Config::Get(Config::MAIN_REMOVE_UI_DELAY))
           g_presenter->Present();
       },
@@ -244,7 +260,15 @@ void SaveToBuffer(Core::System& system, std::vector<u8>& buffer, bool emit_event
       system,
       [&] {
         if (emit_event)
-          API::GetEventHub().EmitEvent(API::Events::SaveStateSave{false, -1});
+        {
+          const auto& ppc_state = system.GetPPCState();
+          ASSERT(Core::IsCPUThread());
+          Core::CPUThreadGuard guard(system);
+          if (!ppc_state.msr.DR || !ppc_state.msr.IR)
+            PanicAlertFmt("Send screenshot to Blounard. L268, PC {:x}", ppc_state.pc);
+          else
+            API::GetEventHub().EmitEvent(API::Events::SaveStateSave{false, -1});
+        }
         u8* ptr = nullptr;
         PointerWrap p_measure(&ptr, 0, PointerWrap::Mode::Measure);
 
@@ -499,7 +523,15 @@ void SaveAs(Core::System& system, const std::string& filename, bool wait,
 
         // Measure the size of the buffer.
         if (emit_event)
-          API::GetEventHub().EmitEvent(API::Events::SaveStateSave{is_slot, slot});
+        {
+          const auto& ppc_state = system.GetPPCState();
+          ASSERT(Core::IsCPUThread());
+          Core::CPUThreadGuard guard(system);
+          if (!ppc_state.msr.DR || !ppc_state.msr.IR)
+            PanicAlertFmt("Send screenshot to Blounard. L531, PC {:x}", ppc_state.pc);
+          else
+            API::GetEventHub().EmitEvent(API::Events::SaveStateSave{is_slot, slot});
+        }       
         u8* ptr = nullptr;
         PointerWrap p_measure(&ptr, 0, PointerWrap::Mode::Measure);
         DoState(system, p_measure);
@@ -908,7 +940,15 @@ void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int
       [&] {
         //Sync StateLoad before Load
         if (emit_event)
-          API::GetEventHub().EmitEvent(API::Events::BeforeSaveStateLoad{is_slot, slot});
+        {
+          const auto& ppc_state = system.GetPPCState();
+          ASSERT(Core::IsCPUThread());
+          Core::CPUThreadGuard guard(system);
+          if (!ppc_state.msr.DR || !ppc_state.msr.IR)
+            PanicAlertFmt("Send screenshot to Blounard. L948, PC {:x}", ppc_state.pc);
+          else
+            API::GetEventHub().EmitEvent(API::Events::BeforeSaveStateLoad{is_slot, slot});
+        }
         // Save temp buffer for undo load state
         auto& movie = system.GetMovie();
         if (!movie.IsJustStartingRecordingInputFromSaveState() && Config::Get(Config::MAIN_ENABLE_BACKUP_LOADSTATE))
@@ -946,7 +986,15 @@ void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int
           {
             //Sync StateLoad After Load
             if (emit_event)
-              API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{is_slot, slot});
+            {
+              const auto& ppc_state = system.GetPPCState();
+              ASSERT(Core::IsCPUThread());
+              Core::CPUThreadGuard guard(system);
+              if (!ppc_state.msr.DR || !ppc_state.msr.IR)
+                PanicAlertFmt("Send screenshot to Blounard. L994, PC {:x}", ppc_state.pc);
+              else
+                API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{is_slot, slot});
+            }
             std::filesystem::path tempfilename(filename);
             Core::DisplayMessage(
                 fmt::format("Loaded State from {}", tempfilename.filename().string()), 2000);

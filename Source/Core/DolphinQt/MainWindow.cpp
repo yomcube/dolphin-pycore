@@ -1446,7 +1446,8 @@ void MainWindow::StateLoad()
       this, tr("Select a File"), dialog_path, tr("All Save States (*.sav *.s##);; All Files (*)"));
   Config::SetBase(Config::MAIN_CURRENT_STATE_PATH, QFileInfo(path).dir().path().toStdString());
   if (!path.isEmpty())
-    State::LoadFile(m_system, path.toStdString(), true);
+    Core::QueueHostJob(
+        [path](auto& m_system) { State::LoadFile(m_system, path.toStdString(), true); });
 }
 
 void MainWindow::StateSave()
@@ -1458,47 +1459,52 @@ void MainWindow::StateSave()
       this, tr("Select a File"), dialog_path, tr("All Save States (*.sav *.s##);; All Files (*)"));
   Config::SetBase(Config::MAIN_CURRENT_STATE_PATH, QFileInfo(path).dir().path().toStdString());
   if (!path.isEmpty())
-    State::SaveFile(m_system, path.toStdString(), true, true);
+    Core::QueueHostJob(
+        [path](auto& m_system) {
+      State::SaveFile(m_system, path.toStdString(), true, true);
+    });
 }
 
 void MainWindow::StateLoadSlot()
 {
-  State::Load(m_system, m_state_slot, true);
+  int slot = m_state_slot;
+  Core::QueueHostJob([slot](auto& m_system) { State::Load(m_system, slot, true); });
 }
 
 void MainWindow::StateSaveSlot()
 {
-  State::Save(m_system, m_state_slot, true, true);
+  int slot = m_state_slot;
+  Core::QueueHostJob([slot](auto& m_system) { State::Save(m_system, slot, true, true); });
 }
 
 void MainWindow::StateLoadSlotAt(int slot)
 {
-  State::Load(m_system, slot, true);
+  Core::QueueHostJob([slot](auto& m_system) { State::Load(m_system, slot, true); });
 }
 
 void MainWindow::StateLoadLastSavedAt(int slot)
 {
-  State::LoadLastSaved(m_system, slot);
+  Core::QueueHostJob([slot](auto& m_system) { State::LoadLastSaved(m_system, slot); });
 }
 
 void MainWindow::StateSaveSlotAt(int slot)
 {
-  State::Save(m_system, slot, true, true);
+  Core::QueueHostJob([slot](auto& m_system) { State::Save(m_system, slot, true, true); });
 }
 
 void MainWindow::StateLoadUndo()
 {
-  State::UndoLoadState(m_system);
+  Core::QueueHostJob([](auto& m_system) { State::UndoLoadState(m_system); });
 }
 
 void MainWindow::StateSaveUndo()
 {
-  State::UndoSaveState(m_system);
+  Core::QueueHostJob([](auto& m_system) { State::UndoSaveState(m_system); });
 }
 
 void MainWindow::StateSaveOldest()
 {
-  State::SaveFirstSaved(m_system);
+  Core::QueueHostJob([](auto& m_system) { State::SaveFirstSaved(m_system); });
 }
 
 void MainWindow::SetStateSlot(int slot)
