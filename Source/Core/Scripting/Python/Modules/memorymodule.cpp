@@ -6,6 +6,7 @@
 
 #include "Core/API/Memory.h"
 #include "Core/HW/Memmap.h"
+#include "Core/PowerPC/PowerPC.h"
 #include "Core/System.h"
 
 #include "Scripting/Python/Utils/module.h"
@@ -134,12 +135,16 @@ static PyObject* IsMemoryAccessible(PyObject* self, PyObject* args)
   // Sometimes, it's not possible depending on the PPC State
   // It can cause a Panic Alert, and crash the game
   const auto& ppc_state = Core::System::GetInstance().GetPPCState();
-  ASSERT(Core::IsCPUThread());
-  Core::CPUThreadGuard guard(system);
+  if (!Core::IsCPUThread())
+    Py_RETURN_FALSE;
+  else
+  {
+    Core::CPUThreadGuard guard(Core::System::GetInstance());
   if (!ppc_state.msr.DR || !ppc_state.msr.IR)
     Py_RETURN_FALSE;
   else
     Py_RETURN_TRUE;
+  }
 }
 
 static void SetupMemoryModule(PyObject* module, MemoryModuleState* state)
