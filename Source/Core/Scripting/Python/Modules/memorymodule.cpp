@@ -128,6 +128,20 @@ static PyObject* RemoveMemcheck(PyObject* self, PyObject* args)
   Py_RETURN_NONE;
 }
 
+static PyObject* IsMemoryAccessible(PyObject* self, PyObject* args)
+{
+  // Function to check if we can do memory reads and memory write
+  // Sometimes, it's not possible depending on the PPC State
+  // It can cause a Panic Alert, and crash the game
+  const auto& ppc_state = Core::System::GetInstance().GetPPCState();
+  ASSERT(Core::IsCPUThread());
+  Core::CPUThreadGuard guard(system);
+  if (!ppc_state.msr.DR || !ppc_state.msr.IR)
+    Py_RETURN_FALSE;
+  else
+    Py_RETURN_TRUE;
+}
+
 static void SetupMemoryModule(PyObject* module, MemoryModuleState* state)
 {
   // If Memory wasn't static, you'd store the memory instance in the state:
@@ -171,6 +185,8 @@ PyMODINIT_FUNC PyInit_memory()
       {"write_f64", Write<API::Memory::Write_F64, double>, METH_VARARGS, ""},
 
       {"write_bytes", WriteBytes<API::Memory::Write_Bytes>, METH_VARARGS, ""},
+
+      {"is_memory_accessible", IsMemoryAccessible, METH_NOARGS, ""},
 
       {nullptr, nullptr, 0, nullptr}  // Sentinel
   };
