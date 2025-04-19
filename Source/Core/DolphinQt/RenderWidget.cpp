@@ -85,9 +85,7 @@ RenderWidget::RenderWidget(QWidget* parent) : QWidget(parent)
   m_mouse_timer->setSingleShot(true);
   setMouseTracking(true);
 
-  QTimer* script_event_timer = new QTimer(this);
-  connect(script_event_timer, &QTimer::timeout, this, &RenderWidget::EmitScriptEvent);
-  script_event_timer->start(1000 / 60);
+  QTimer::singleShot(1000/30, this, &RenderWidget::EmitScriptEvent);
 
   connect(&Settings::Instance(), &Settings::CursorVisibilityChanged, this,
           &RenderWidget::OnHideCursorChanged);
@@ -112,13 +110,10 @@ QPaintEngine* RenderWidget::paintEngine() const
 
 void RenderWidget::EmitScriptEvent()
 {
-  //Not sure if it's best to QueueHostJob or normally emit
-  Core::QueueHostJob([](Core::System& system) {
-    API::GetEventHub().EmitEvent(API::Events::TimerTick{});
-  });
-        
-}
+  API::GetEventHub().EmitEvent(API::Events::TimerTick{});
+  QTimer::singleShot(1000 / 30, this, &RenderWidget::EmitScriptEvent);
 
+}
 
 void RenderWidget::dragEnterEvent(QDragEnterEvent* event)
 {
