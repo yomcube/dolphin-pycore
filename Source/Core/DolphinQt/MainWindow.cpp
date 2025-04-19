@@ -240,6 +240,9 @@ MainWindow::MainWindow(Core::System& system, std::unique_ptr<BootParameters> boo
   ConnectStack();
   ConnectMenuBar();
 
+  m_bugfix_counter = 0;
+  QTimer::singleShot(1000, this, &MainWindow::ReloadControllers);
+
   QSettings& settings = Settings::GetQSettings();
   restoreState(settings.value(QStringLiteral("mainwindow/state")).toByteArray());
   restoreGeometry(settings.value(QStringLiteral("mainwindow/geometry")).toByteArray());
@@ -249,8 +252,13 @@ MainWindow::MainWindow(Core::System& system, std::unique_ptr<BootParameters> boo
     show();
   }
 
+
   InitControllers();
   ConnectHotkeys();
+  if (script.has_value())
+  {
+    Scripts::g_scripts[script.value()] = nullptr;
+  }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
   connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this,
@@ -340,10 +348,6 @@ MainWindow::MainWindow(Core::System& system, std::unique_ptr<BootParameters> boo
     m_pending_boot.reset();
   }
 
-  if (script.has_value())
-  {
-    Scripts::g_scripts[script.value()] = nullptr;
-  }
 }
 
 MainWindow::~MainWindow()
@@ -386,10 +390,24 @@ WindowSystemInfo MainWindow::GetWindowSystemInfo() const
   return ::GetWindowSystemInfo(m_render_widget->windowHandle());
 }
 
+// This function is an attempt at fixing the controller not
+// correctly init at the start of dolphin
+void MainWindow::ReloadControllers()
+{
+  MainWindow::InitControllers();
+  if (m_bugfix_counter < 5)
+  {
+    QTimer::singleShot(1000, this, &MainWindow::ReloadControllers);
+    m_bugfix_counter++;
+  }
+}
 void MainWindow::InitControllers()
 {
   if (g_controller_interface.IsInit())
+  {
+    g_controller_interface.RefreshDevices();
     return;
+  }
 
   UICommon::InitControllers(::GetWindowSystemInfo(windowHandle()));
 
@@ -792,7 +810,7 @@ void MainWindow::RefreshGameList()
 {
   Settings::Instance().ReloadTitleDB();
   Settings::Instance().RefreshGameList();
-  g_controller_interface.RefreshDevices();
+  InitControllers();
 }
 
 QStringList MainWindow::PromptFileNames()
@@ -1150,9 +1168,6 @@ void MainWindow::StartGame(std::unique_ptr<BootParameters>&& parameters)
 
   // We need the render widget before booting.
   ShowRenderWidget();
-
-  //Attempt to fix the keyboard hotkey issue
-  Core::RunOnCPUThread(m_system, [&] { MainWindow::RefreshGameList(); }, true);
 
   // Boot up, show an error if it fails to load the game.
   if (!BootManager::BootCore(m_system, std::move(parameters),

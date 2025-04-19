@@ -139,6 +139,7 @@ private:
   void ConnectStack();
   void ConnectToolBar();
 
+  void ReloadControllers();
   void InitControllers();
   void ShutdownControllers();
 
@@ -279,4 +280,5 @@ private:
   CheatsManager* m_cheats_manager;
   ScriptingWidget* m_scripting_widget;
   QByteArray m_render_widget_geometry;
+  int m_bugfix_counter;
 };

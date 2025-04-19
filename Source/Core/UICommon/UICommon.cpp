@@ -160,8 +160,10 @@ void Shutdown()
 void InitControllers(const WindowSystemInfo& wsi)
 {
   if (g_controller_interface.IsInit())
+  {
+    g_controller_interface.RefreshDevices();
     return;
-
+  }
   g_controller_interface.Initialize(wsi);
 
   if (!g_controller_interface.HasDefaultDevice())
