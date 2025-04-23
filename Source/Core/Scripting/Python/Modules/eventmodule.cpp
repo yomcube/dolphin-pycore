@@ -73,7 +73,8 @@ using EventModuleState = GenericEventModuleState<
   API::Events::Unpause,
   API::Events::FocusChange,
   API::Events::RenderGeometryChange,
-  API::Events::TimerTick
+  API::Events::TimerTick,
+  API::Events::ScriptEnd
 >;
 
 // These template shenanigans are all required for PyEventFromMappingFunc
@@ -283,6 +284,10 @@ static const std::tuple<> PyTimerTick(const API::Events::TimerTick& evt)
 {
   return std::make_tuple();
 }
+static const std::tuple<int> PyScriptEnd(const API::Events::ScriptEnd& evt)
+{
+  return std::make_tuple(evt.id);
+}
 
 // EVENT DEFINITIONS
 // Creates a PyEvent class from the signature.
@@ -298,6 +303,7 @@ using PyUnpauseEvent = PyEventFromMappingFunc<PyUnpause>;
 using PyFocusChangeEvent = PyEventFromMappingFunc<PyFocusChange>;
 using PyRenderGeometryChangeEvent = PyEventFromMappingFunc<PyRenderGeometryChange>;
 using PyTimerTickEvent = PyEventFromMappingFunc<PyTimerTick>;
+using PyScriptEndEvent = PyEventFromMappingFunc<PyScriptEnd>;
 
 // HOOKING UP PY EVENTS TO DOLPHIN EVENTS
 // For all python events listed here, listens to the respective API::Events event
@@ -314,7 +320,8 @@ using EventTuple = std::tuple<
   PyUnpauseEvent,
   PyFocusChangeEvent,
   PyRenderGeometryChangeEvent,
-  PyTimerTickEvent
+  PyTimerTickEvent,
+  PyScriptEndEvent
   >;
 using EventContainer = PythonEventContainer<
   PyFrameAdvanceEvent,
@@ -328,7 +335,8 @@ using EventContainer = PythonEventContainer<
   PyUnpauseEvent,
   PyFocusChangeEvent,
   PyRenderGeometryChangeEvent,
-  PyTimerTickEvent
+  PyTimerTickEvent,
+  PyScriptEndEvent
 >;
 template <>
 const EventTuple EventContainer::s_pyevents = {};
@@ -351,6 +359,7 @@ std::optional<CoroutineScheduler> GetCoroutineScheduler(std::string aeventname)
       {"focuschange", PyFocusChangeEvent::ScheduleCoroutine},
       {"rendergeometrychange", PyRenderGeometryChangeEvent::ScheduleCoroutine},
       {"timertick", PyTimerTickEvent::ScheduleCoroutine},
+      {"scriptend", PyScriptEndEvent::ScheduleCoroutine},
   };
   auto iter = lookup.find(aeventname);
   if (iter == lookup.end())
@@ -404,6 +413,9 @@ async def rendergeometrychange():
 
 async def timertick():
     return (await _DolphinAsyncEvent("timertick"))
+
+async def scriptend():
+    return (await _DolphinAsyncEvent("scriptend"))
 )";
   Py::Object result = Py::LoadPyCodeIntoModule(module, pycode);
   if (result.IsNull())
@@ -451,6 +463,7 @@ PyMODINIT_FUNC PyInit_event()
       Py::MakeMethodDef<PyFocusChangeEvent::SetCallback>("on_focuschange"),
       Py::MakeMethodDef<PyRenderGeometryChangeEvent::SetCallback>("on_rendergeometrychange"),
       Py::MakeMethodDef<PyTimerTickEvent::SetCallback>("on_timertick"),
+      Py::MakeMethodDef<PyScriptEndEvent::SetCallback>("on_scriptend"),
       Py::MakeMethodDef<Reset>("_dolphin_reset"),
       Py::MakeMethodDef<SystemReset>("system_reset"),
 

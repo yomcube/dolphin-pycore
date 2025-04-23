@@ -78,6 +78,10 @@ struct RenderGeometryChange
 struct TimerTick
 {
 };
+struct ScriptEnd
+{
+  int id;
+};
 
 }  // namespace API::Events
 
@@ -228,7 +232,8 @@ using EventHub = GenericEventHub<
   Events::Unpause,
   Events::FocusChange,
   Events::RenderGeometryChange,
-  Events::TimerTick
+  Events::TimerTick,
+  Events::ScriptEnd
 >;
 
 // global event hub
