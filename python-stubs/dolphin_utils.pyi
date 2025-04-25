@@ -95,3 +95,6 @@ def activate_script(scriptPath : str) -> None:
 
 def get_script_name() -> str:
 	"""Return the filepath of the current script"""
+	
+def get_script_id() -> int:
+	"""Return the id of the current script"""

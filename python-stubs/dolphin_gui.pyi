@@ -27,7 +27,7 @@ def clear_osd_messages() -> None:
 def get_display_size() -> tuple[float, float]:
     """:return: The current display size in pixels."""
 	
-def get_display_size() -> int:
+def get_font_size() -> int:
     """:return: The current font size in pixels."""
 
 

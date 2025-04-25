@@ -219,3 +219,13 @@ def write_bytes(addr: int, bytes: bytearray, /) -> None:
     :param addr: memory address to start writing to
     :param bytes: bytearray of bytes to write
     """
+
+def is_memory_accessible() -> bool:
+	"""
+	Return a boolean value corresponding to
+	the state of the memory.
+	True means the memory is accessible,
+	False means the memory isn't accessible.
+	Trying to read/write the memory while it's not accessible
+	may result in Dolphin crashing
+	"""
