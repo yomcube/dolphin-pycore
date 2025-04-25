@@ -395,9 +395,9 @@ WindowSystemInfo MainWindow::GetWindowSystemInfo() const
 void MainWindow::ReloadControllers()
 {
   MainWindow::InitControllers();
-  if (m_bugfix_counter < 5)
+  if (m_bugfix_counter < 10)
   {
-    QTimer::singleShot(1000, this, &MainWindow::ReloadControllers);
+    QTimer::singleShot(300, this, &MainWindow::ReloadControllers);
     m_bugfix_counter++;
   }
 }

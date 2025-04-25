@@ -135,7 +135,9 @@ static PyObject* IsMemoryAccessible(PyObject* self, PyObject* args)
   // Sometimes, it's not possible depending on the PPC State
   // It can cause a Panic Alert, and crash the game
   const auto& ppc_state = Core::System::GetInstance().GetPPCState();
-  if (!Core::IsCPUThread())
+  Core::State current_state = GetState(Core::System::GetInstance());
+
+  if (!Core::IsCPUThread() && current_state == Core::State::Running)
     Py_RETURN_FALSE;
   else
   {
