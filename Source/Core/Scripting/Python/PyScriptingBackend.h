@@ -33,6 +33,7 @@ public:
   API::NunchuckButtonsManip* GetNunchuckButtonsManip();
   void AddCleanupFunc(std::function<void()> cleanup_func);
   std::string GetScriptPath();
+  int GetScriptId();
   
 
   // this class somewhat is a wrapper around a python interpreter state,
@@ -58,6 +59,7 @@ private:
   API::NunchuckButtonsManip& m_nunchuck_buttons_manip;
   std::vector<std::function<void()>> m_cleanups;
   std::string m_script_path;
+  int m_script_id;
 };
 
 }  // namespace PyScripting

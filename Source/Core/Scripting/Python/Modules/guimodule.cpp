@@ -6,6 +6,7 @@
 
 #include "Common/Logging/Log.h"
 #include "Core/API/Gui.h"
+#include "Core/Config/MainSettings.h"
 #include "Scripting/Python/PyScriptingBackend.h"
 #include "Scripting/Python/Utils/module.h"
 
@@ -34,6 +35,12 @@ static PyObject* get_display_size(PyObject* self, PyObject* args)
   GuiModuleState* state = Py::GetState<GuiModuleState>(self);
   auto size = state->gui->GetDisplaySize();
   return Py_BuildValue("(ff)", size.x, size.y);
+}
+
+static PyObject* get_font_size(PyObject* self, PyObject* args)
+{
+  auto size = Config::Get(Config::MAIN_IMGUI_FONT_SIZE);
+  return Py_BuildValue("i", size);
 }
 
 static void draw_line(PyObject* self, float ax, float ay, float bx, float by, u32 color, float thickness = 1.0f)
@@ -215,6 +222,7 @@ PyMODINIT_FUNC PyInit_gui()
       {"_add_osd_message", Py::as_py_func<add_osd_message>, METH_VARARGS, ""},
       {"clear_osd_messages", Py::as_py_func<clear_osd_messages>, METH_VARARGS, ""},
       {"get_display_size", get_display_size, METH_NOARGS, ""},
+      {"get_font_size", get_font_size, METH_NOARGS, ""},
       {"_draw_line", Py::as_py_func<draw_line>, METH_VARARGS, ""},
       {"_draw_rect", Py::as_py_func<draw_rect>, METH_VARARGS, ""},
       {"_draw_rect_filled", Py::as_py_func<draw_rect_filled>, METH_VARARGS, ""},

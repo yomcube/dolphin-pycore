@@ -35,6 +35,9 @@ ScriptingBackend::ScriptingBackend(std::filesystem::path script_filepath)
 ScriptingBackend::~ScriptingBackend() {
   if (m_state != nullptr)
   {
+    PyScripting::PyScriptingBackend* backend = static_cast<PyScripting::PyScriptingBackend*>(m_state);
+    int id = backend->GetScriptId();
+    API::GetEventHub().EmitEvent(API::Events::ScriptEnd{id});
     INFO_LOG_FMT(SCRIPTING, "Shutting down scripting engine...");
     delete (PyScripting::PyScriptingBackend*)m_state;
     m_state = nullptr;

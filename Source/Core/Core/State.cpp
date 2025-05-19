@@ -482,8 +482,8 @@ static void CompressAndDumpState(Core::System& system, CompressAndDumpState_args
   Host_UpdateMainFrame();
 }
 
-void SaveAs(Core::System& system, const std::string& filename, bool wait,
-            bool is_slot, int slot, bool emit_event)
+void SaveAs(Core::System& system, const std::string& filename, bool wait, bool is_slot, int slot,
+            bool emit_event)
 {
   std::unique_lock lk(s_load_or_save_in_progress_mutex, std::try_to_lock);
   if (!lk)
@@ -883,7 +883,8 @@ void SaveFile(Core::System& system, const std::string& filename, bool wait, bool
   SaveAs(system, filename, wait, false, -1, emit_event);
 }
 
-void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int slot, bool emit_event)
+void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int slot,
+            bool emit_event)
 {
   if (!Core::IsRunningOrStarting(system))
     return;
@@ -906,12 +907,13 @@ void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int
   Core::RunOnCPUThread(
       system,
       [&] {
-        //Sync StateLoad before Load
+        // Sync StateLoad before Load
         if (emit_event)
           API::GetEventHub().EmitEvent(API::Events::BeforeSaveStateLoad{is_slot, slot});
         // Save temp buffer for undo load state
         auto& movie = system.GetMovie();
-        if (!movie.IsJustStartingRecordingInputFromSaveState() && Config::Get(Config::MAIN_ENABLE_BACKUP_LOADSTATE))
+        if (!movie.IsJustStartingRecordingInputFromSaveState() &&
+            Config::Get(Config::MAIN_ENABLE_BACKUP_LOADSTATE))
         {
           std::lock_guard lk2(s_undo_load_buffer_mutex);
           SaveToBuffer(system, s_undo_load_buffer, emit_event);
@@ -944,7 +946,7 @@ void LoadAs(Core::System& system, const std::string& filename, bool is_slot, int
         {
           if (loadedSuccessfully)
           {
-            //Sync StateLoad After Load
+            // Sync StateLoad After Load
             if (emit_event)
               API::GetEventHub().EmitEvent(API::Events::SaveStateLoad{is_slot, slot});
             std::filesystem::path tempfilename(filename);

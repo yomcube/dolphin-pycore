@@ -9,7 +9,7 @@
 
 namespace Common
 {
-#define EMULATOR_NAME "Dolphin Pycore"
+#define EMULATOR_NAME "Dolphin PyCore"
 
 #ifdef _DEBUG
 #define BUILD_TYPE_STR "Debug "

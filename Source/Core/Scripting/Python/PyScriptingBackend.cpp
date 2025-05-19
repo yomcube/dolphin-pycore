@@ -149,6 +149,7 @@ PyScriptingBackend::PyScriptingBackend(std::filesystem::path script_filepath,
   }
   u64 interp_id = PyInterpreterState_GetID(m_interp_threadstate->interp);
   s_instances[interp_id] = this;
+  m_script_id = int(interp_id);
 
   {
     // new scope because we need to drop these PyObjects before we release the GIL
@@ -252,6 +253,11 @@ PyScriptingBackend* PyScriptingBackend::GetCurrent()
   PyInterpreterState* interp_state = PyThreadState_Get()->interp;
   u64 interp_id = PyInterpreterState_GetID(interp_state);
   return s_instances[interp_id];
+}
+
+int PyScriptingBackend::GetScriptId()
+{
+  return m_script_id;
 }
 
 std::string PyScriptingBackend::GetScriptPath()

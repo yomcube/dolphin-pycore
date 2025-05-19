@@ -90,8 +90,11 @@ def cancel_script(scriptPath : str) -> None:
 def activate_script(scriptPath : str) -> None:
 	"""Activate the script with the corresponding path
 		The script activate is delayed to when the host is free.
-		It means it won't cancel immediately, but it will cancel after
+		It means it won't activate immediately, but it will activate after
 		the current python script main() is over."""
 
 def get_script_name() -> str:
 	"""Return the filepath of the current script"""
+	
+def get_script_id() -> int:
+	"""Return the id of the current script"""

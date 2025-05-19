@@ -209,6 +209,13 @@ static PyObject* get_script_name(PyObject* module, PyObject* args)
   return Py_BuildValue("s", (cur_instance->GetScriptPath()).c_str());
 }
 
+static PyObject* get_script_id(PyObject* module, PyObject* args)
+{
+  PyScripting::PyScriptingBackend* cur_instance = PyScripting::PyScriptingBackend::GetCurrent();
+
+  return Py_BuildValue("i", (cur_instance->GetScriptId()));
+}
+
 static void setup_file_module(PyObject* module, FileState* state)
 {
   // I don't think we need anything here yet
@@ -234,6 +241,7 @@ PyMODINIT_FUNC PyInit_dol_utils()
                                   {"cancel_script", (PyCFunction) cancel_script, METH_VARARGS | METH_KEYWORDS, ""},
                                   {"activate_script", (PyCFunction) activate_script, METH_VARARGS | METH_KEYWORDS, ""},
                                   {"get_script_name", get_script_name, METH_NOARGS, ""},
+                                  {"get_script_id", get_script_id, METH_NOARGS, ""},
                                   {nullptr, nullptr, 0, nullptr}};
   static PyModuleDef module_def =
       Py::MakeStatefulModuleDef<FileState, setup_file_module>("dolphin_utils", methods);

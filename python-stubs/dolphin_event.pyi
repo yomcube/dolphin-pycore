@@ -197,6 +197,28 @@ def on_timertick(callback: Callable[[], None] | None) -> None:
 async def frameadvance() -> None:
     """Awaitable event that completes 60 times per second"""
 	
+
+@type_check_only
+class _ScriptEndCallback(Protocol):
+    def __call__(self, id_: int) -> None:
+        """
+        Example callback stub for rendergeometrychange.
+
+        :param id_: id of the script ending (correspond with utils.get_script_id())
+        """
+
+def on_scriptend(callback: _ScriptEndCallback | None) -> None:
+    """
+    Registers a callback to be called when any script ends.
+
+    :param callback:
+    :return:
+    """
+
+
+async def scriptend() -> int:
+    """Awaitable event that completes when any script ends."""
+	
 	
 def system_reset() -> None:
     """Resets the emulation."""
